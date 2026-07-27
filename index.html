@@ -307,8 +307,8 @@
         thead tr:first-child th[colspan="9"]:nth-of-type(2) { border-right: 2px solid #1a4731; }
         
         .data-table tbody td:nth-child(2) { border-right: 2px solid #e2e8f0; }
-        .data-table tbody td:nth-child(11) { border-right: 2px solid #e2e8f0; }
-        .data-table tbody td:nth-child(20) { border-right: 2px solid #e2e8f0; }
+        .data-table tbody td:nth-child(13) { border-right: 2px solid #e2e8f0; }
+        .data-table tbody td:nth-child(24) { border-right: 2px solid #e2e8f0; }
         
         .clear-all-overrides {
             background: #e53e3e; color: white; border: none; border-radius: 6px;
@@ -1228,10 +1228,12 @@
                 eugeneStatePension: eugState, eugeneAvon: eugAvon, eugeneCivil: eugCivil,
                 eugeneDrawdown: eugDraw, eugenePot: Math.max(0, eugenePot),
                 eugeneTFC: eugTFC, eugenePhased: eugPhased,
+                eugeneTFCRemaining: (eugPhased && eugTFCRemaining !== null) ? Math.max(0, eugTFCRemaining) : null,
                 eugeneGross: eugGross, eugeneTax: eugTax, eugeneNet: eugNet, eugeneIncomeLimited: eugLimited,
                 annabelleStatePension: annState, annabelleTeachers: annTeach,
                 annabelleDrawdown: annDraw, annabellePot: Math.max(0, annabellePot),
                 annabelleTFC: annTFC, annabellePhased: annPhased,
+                annabelleTFCRemaining: (annPhased && annTFCRemaining !== null) ? Math.max(0, annTFCRemaining) : null,
                 annabelleGross: annGross, annabelleTax: annTax, annabelleNet: annNet, annabelleIncomeLimited: annLimited,
                 totalFamilyGross: totGross, totalFamilyNet: totNet, livingCosts: living, excessFunds
             });
@@ -1774,8 +1776,12 @@
     function renderTable(data) {
         const thead = document.querySelector('#dataTable thead');
         const tbody = document.querySelector('#dataTable tbody');
-        thead.innerHTML = `<tr class="header-group"><th rowspan="2">Year</th><th rowspan="2">Infl</th><th colspan="10" style="background:#ebf4ff;color:#1a365d;border-right:2px solid #1a365d;">EI</th><th colspan="10" style="background:#f0fff4;color:#1a4731;border-right:2px solid #1a4731;">AI</th><th colspan="3" style="background:#faf5ff;color:#44337a;">Family</th></tr><tr><th>Age</th><th>Target</th><th>State</th><th>DB</th><th>Draw</th><th>TFC</th><th>Pot</th><th>Gross</th><th>Tax</th><th>Net</th><th>Age</th><th>Target</th><th>State</th><th>DB</th><th>Draw</th><th>TFC</th><th>Pot</th><th>Gross</th><th>Tax</th><th>Net</th><th>Gross</th><th>Net</th><th>Excess</th></tr>`;
+        thead.innerHTML = `<tr class="header-group"><th rowspan="2">Year</th><th rowspan="2">Infl</th><th colspan="11" style="background:#ebf4ff;color:#1a365d;border-right:2px solid #1a365d;">EI</th><th colspan="11" style="background:#f0fff4;color:#1a4731;border-right:2px solid #1a4731;">AI</th><th colspan="3" style="background:#faf5ff;color:#44337a;">Family</th></tr><tr><th>Age</th><th>Target</th><th>State</th><th>DB</th><th>Draw</th><th>TFC</th><th>TFC Left</th><th>Pot</th><th>Gross</th><th>Tax</th><th>Net</th><th>Age</th><th>Target</th><th>State</th><th>DB</th><th>Draw</th><th>TFC</th><th>TFC Left</th><th>Pot</th><th>Gross</th><th>Tax</th><th>Net</th><th>Gross</th><th>Net</th><th>Excess</th></tr>`;
         const fmt = n => '£' + Math.round(n).toLocaleString('en-GB');
+        const fmtTFCLeft = (rem, phased, phase) => {
+            if (!phased || phase !== 'drawdown' || rem === null || rem === undefined) return '<td class="pre-drawdown">-</td>';
+            return `<td class="${rem <= 0 ? 'negative' : ''}" style="font-size:0.75rem;color:${rem > 0 ? '#805ad5' : ''};">${fmt(rem)}</td>`;
+        };
         tbody.innerHTML = data.map(r => {
             const eEx = r.eugenePot <= 0 && r.eugenePhase === 'drawdown';
             const aEx = r.annabellePot <= 0 && r.annabellePhase === 'drawdown';
@@ -1806,7 +1812,7 @@
                 ? `<td class="${r.excessFunds<0?'negative':'positive'}">${fmt(r.excessFunds)}</td>`
                 : `<td class="pre-drawdown">-</td>`;
             
-            return `<tr class="${cls}"><td>${r.year}</td><td>${(r.inflationRate*100).toFixed(1)}%</td>${eugAgeCell}${tCell('eugene',r.eugenePhase,r.eugeneTargetGross,r.eugeneIncomeLimited,r.eugeneHasOverride)}<td>${r.eugeneStatePension>0?fmt(r.eugeneStatePension):'-'}</td><td>${(r.eugeneAvon+r.eugeneCivil)>0?fmt(r.eugeneAvon+r.eugeneCivil):'-'}</td><td>${r.eugeneDrawdown>0?fmt(r.eugeneDrawdown):(r.eugenePhase==='drawdown'?'£0':'-')}</td><td>${r.eugeneTFC>0?fmt(r.eugeneTFC):(r.eugenePhase==='drawdown'&&r.eugenePhased?'£0':'-')}</td><td class="${eEx?'negative':''}">${fmt(r.eugenePot)}</td><td>${fmt(r.eugeneGross)}</td><td>${fmt(r.eugeneTax)}</td><td>${fmt(r.eugeneNet)}</td>${annAgeCell}${tCell('annabelle',r.annabellePhase,r.annabelleTargetGross,r.annabelleIncomeLimited,r.annabelleHasOverride)}<td>${r.annabelleStatePension>0?fmt(r.annabelleStatePension):'-'}</td><td>${r.annabelleTeachers>0?fmt(r.annabelleTeachers):'-'}</td><td>${r.annabelleDrawdown>0?fmt(r.annabelleDrawdown):(r.annabellePhase==='drawdown'?'£0':'-')}</td><td>${r.annabelleTFC>0?fmt(r.annabelleTFC):(r.annabellePhase==='drawdown'&&r.annabellePhased?'£0':'-')}</td><td class="${aEx?'negative':''}">${fmt(r.annabellePot)}</td><td>${fmt(r.annabelleGross)}</td><td>${fmt(r.annabelleTax)}</td><td>${fmt(r.annabelleNet)}</td><td>${fmt(r.totalFamilyGross)}</td><td>${fmt(r.totalFamilyNet)}</td>${excessDisplay}</tr>`;
+            return `<tr class="${cls}"><td>${r.year}</td><td>${(r.inflationRate*100).toFixed(1)}%</td>${eugAgeCell}${tCell('eugene',r.eugenePhase,r.eugeneTargetGross,r.eugeneIncomeLimited,r.eugeneHasOverride)}<td>${r.eugeneStatePension>0?fmt(r.eugeneStatePension):'-'}</td><td>${(r.eugeneAvon+r.eugeneCivil)>0?fmt(r.eugeneAvon+r.eugeneCivil):'-'}</td><td>${r.eugeneDrawdown>0?fmt(r.eugeneDrawdown):(r.eugenePhase==='drawdown'?'£0':'-')}</td><td>${r.eugeneTFC>0?fmt(r.eugeneTFC):(r.eugenePhase==='drawdown'&&r.eugenePhased?'£0':'-')}</td>${fmtTFCLeft(r.eugeneTFCRemaining,r.eugenePhased,r.eugenePhase)}<td class="${eEx?'negative':''}">${fmt(r.eugenePot)}</td><td>${fmt(r.eugeneGross)}</td><td>${fmt(r.eugeneTax)}</td><td>${fmt(r.eugeneNet)}</td>${annAgeCell}${tCell('annabelle',r.annabellePhase,r.annabelleTargetGross,r.annabelleIncomeLimited,r.annabelleHasOverride)}<td>${r.annabelleStatePension>0?fmt(r.annabelleStatePension):'-'}</td><td>${r.annabelleTeachers>0?fmt(r.annabelleTeachers):'-'}</td><td>${r.annabelleDrawdown>0?fmt(r.annabelleDrawdown):(r.annabellePhase==='drawdown'?'£0':'-')}</td><td>${r.annabelleTFC>0?fmt(r.annabelleTFC):(r.annabellePhase==='drawdown'&&r.annabellePhased?'£0':'-')}</td>${fmtTFCLeft(r.annabelleTFCRemaining,r.annabellePhased,r.annabellePhase)}<td class="${aEx?'negative':''}">${fmt(r.annabellePot)}</td><td>${fmt(r.annabelleGross)}</td><td>${fmt(r.annabelleTax)}</td><td>${fmt(r.annabelleNet)}</td><td>${fmt(r.totalFamilyGross)}</td><td>${fmt(r.totalFamilyNet)}</td>${excessDisplay}</tr>`;
         }).join('');
         
         tbody.querySelectorAll('.editable-cell').forEach(c => c.addEventListener('click', handleCellClick));
