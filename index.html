@@ -789,7 +789,7 @@
                     <p style="font-size: 0.85rem; color: var(--text-muted); margin: 4px 0 0 0;">
                         💡 Click <strong>EI Target</strong> or <strong>AI Target</strong> cells to manually adjust income.<br>
                         🔒 Cells locked when pot is depleted. Living costs only apply once drawdown begins.<br>
-                        💷 <strong>TFC</strong> = tax-free cash used from the remaining 25% entitlement within each phased Parmenion (DC) withdrawal. DB pensions are always fully taxable.
+                        💷 <strong>TFC</strong> = tax-free cash used from the remaining 25% entitlement within each phased Parmenion (DC) withdrawal. Phased withdrawals first fill any unused personal allowance (0% tax), then draw TFC — so the entitlement lasts as long as possible. DB pensions are always fully taxable.
                     </p>
                     <div id="optionsStatus" style="font-size: 0.85rem; color: var(--text); margin-top: 8px; padding: 8px 10px; background: #f8fafc; border: 1px solid var(--border); border-radius: 6px; line-height: 1.6;"></div>
                 </div>
@@ -1093,10 +1093,16 @@
                     eugLimited = true;
                     eugTarget = eugDB + eugDraw;
                 }
-                // TFC: use remaining entitlement up to the full withdrawal, capped
-                // at 25% of the pot (the maximum crystallisation can release)
+                // TFC: the taxable element first fills any unused personal
+                // allowance (taxed at 0%); only the remainder of the withdrawal
+                // draws on the TFC entitlement (capped at 25% of the pot, the
+                // maximum crystallisation can release). This preserves the
+                // entitlement instead of wasting the personal allowance.
                 if (eugPhased && eugDraw > 0 && eugTFCRemaining > 0) {
-                    eugTFC = Math.min(eugTFCRemaining, eugDraw, PCLS_RATE * (eugenePot + eugDraw));
+                    const eugPA = getTaxThresholds(year).personalAllowance;
+                    const eugUnusedPA = Math.max(0, eugPA - eugDB);
+                    const eugDesiredTFC = Math.max(0, eugDraw - eugUnusedPA);
+                    eugTFC = Math.min(eugTFCRemaining, eugDesiredTFC, eugDraw, PCLS_RATE * (eugenePot + eugDraw));
                     eugTFCRemaining -= eugTFC;
                 }
             }
@@ -1174,8 +1180,15 @@
                     annLimited = true;
                     annTarget = annDB + annDraw;
                 }
+                // TFC: taxable element fills any unused personal allowance
+                // first (taxed at 0%); only the remainder draws on the TFC
+                // entitlement (capped at 25% of the pot). Preserves the
+                // entitlement instead of wasting the personal allowance.
                 if (annPhased && annDraw > 0 && annTFCRemaining > 0) {
-                    annTFC = Math.min(annTFCRemaining, annDraw, PCLS_RATE * (annabellePot + annDraw));
+                    const annPA = getTaxThresholds(year).personalAllowance;
+                    const annUnusedPA = Math.max(0, annPA - annDB);
+                    const annDesiredTFC = Math.max(0, annDraw - annUnusedPA);
+                    annTFC = Math.min(annTFCRemaining, annDesiredTFC, annDraw, PCLS_RATE * (annabellePot + annDraw));
                     annTFCRemaining -= annTFC;
                 }
             }
