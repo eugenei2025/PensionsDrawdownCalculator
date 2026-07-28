@@ -342,6 +342,74 @@
         .ei-card .lump-sum-section h4 { color: #1e40af; }
         .ai-card .lump-sum-section { background: #ecfdf5; border-color: #6ee7b7; }
         .ai-card .lump-sum-section h4 { color: #047857; }
+
+        /* ============================================================================
+           SCENARIO COMPARISON
+           ============================================================================ */
+        .comparison-card { margin-top: 20px; }
+        .snapshot-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
+        .snapshot-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            border: 1px solid var(--border); border-radius: 20px; padding: 4px 6px 4px 12px;
+            font-size: 0.85rem; background: #f8fafc; cursor: pointer; transition: all 0.15s;
+        }
+        .snapshot-chip:hover { border-color: var(--primary-light); }
+        .snapshot-chip.selected { background: #ebf5ff; border-color: var(--primary); font-weight: 600; }
+        .snapshot-chip .chip-delete {
+            border: none; background: none; color: var(--text-muted); cursor: pointer;
+            font-size: 0.9rem; padding: 0 6px; border-radius: 50%;
+        }
+        .snapshot-chip .chip-delete:hover { color: var(--danger); }
+        .comparison-verdict {
+            padding: 10px 14px; border-radius: 8px; font-size: 0.95rem; font-weight: 600;
+            margin-bottom: 14px; border: 1px solid var(--border); background: #f8fafc;
+        }
+        .comparison-verdict.better { background: #f0fff4; border-color: var(--success); color: #276749; }
+        .comparison-verdict.worse { background: #fff5f5; border-color: var(--danger); color: #9b2c2c; }
+        .comparison-verdict.mixed { background: #fffaf0; border-color: var(--warning); color: #9c4221; }
+        .comparison-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-bottom: 16px; }
+        .comparison-table th {
+            text-align: right; padding: 6px 10px; background: #edf2f7; color: var(--text-muted);
+            font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em;
+        }
+        .comparison-table th:first-child, .comparison-table td:first-child { text-align: left; }
+        .comparison-table td { padding: 6px 10px; border-bottom: 1px solid var(--border); text-align: right; }
+        .comparison-table tr.group-row td {
+            background: #f7fafc; font-weight: 700; font-size: 0.78rem; text-transform: uppercase;
+            letter-spacing: 0.04em; color: var(--text-muted); padding: 8px 10px 4px; text-align: left;
+        }
+        .comparison-table tr.fingerprint-row td { font-size: 0.8rem; color: var(--text-muted); font-style: italic; }
+        .delta-better { color: var(--success); font-weight: 700; }
+        .delta-worse { color: var(--danger); font-weight: 700; }
+        .delta-same { color: var(--text-muted); }
+        .cmp-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 16px; }
+        .cmp-chart-box { position: relative; height: 260px; }
+        .cmp-chart-title { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
+        .cmp-chart-wide { grid-column: 1 / -1; }
+        .snapshot-chip input[type="checkbox"] { accent-color: var(--success); cursor: pointer; }
+        .snapshot-chip.comparing { background: #f0fff4; border-color: var(--success); }
+        .snapshot-chip .chip-name { cursor: pointer; }
+        .chip-base-tag {
+            font-size: 0.62rem; font-weight: 700; letter-spacing: 0.04em;
+            background: var(--primary); color: #fff; border-radius: 8px; padding: 1px 6px;
+        }
+        .compare-controls {
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 10px; margin-bottom: 12px;
+        }
+        .verdict-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+        .verdict-row .comparison-verdict { margin-bottom: 0; padding: 6px 10px; font-size: 0.85rem; }
+        .cell-delta { font-size: 0.78rem; }
+        .order-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; }
+        .order-pill {
+            display: inline-flex; align-items: center; gap: 6px; cursor: grab;
+            border: 1.5px solid var(--border); border-radius: 16px; padding: 3px 12px;
+            font-size: 0.82rem; background: #fff; user-select: none; transition: opacity 0.15s, box-shadow 0.15s;
+        }
+        .order-pill:active { cursor: grabbing; }
+        .order-pill.dragging { opacity: 0.35; }
+        .order-pill.drag-over { box-shadow: 0 0 0 2px var(--primary-light); }
+        .order-pill .order-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
         
         /* Print Summary (hidden on screen) */
         .print-summary { display: none; }
@@ -357,7 +425,8 @@
             
             .toolbar, .card, .opt-button, .clear-all-overrides, 
             #clearAllOverrides, .grid, .alerts-section,
-            .summary-grid, .chart-container, footer, .opt-result, .section-title {
+            .summary-grid, .chart-container, footer, .opt-result, .section-title,
+            #comparisonCard {
                 display: none !important;
             }
             
@@ -415,6 +484,7 @@
             <div class="toolbar-group">
                 <button class="toolbar-btn" id="saveScenario" title="Save current scenario">💾 Save Scenario</button>
                 <button class="toolbar-btn" id="loadScenario" title="Load saved scenario">📂 Load Scenario</button>
+                <button class="toolbar-btn" id="saveSnapshot" title="Snapshot the current results for scenario comparison">📌 Save Snapshot</button>
                 <button class="toolbar-btn" id="resetScenario" title="Reset all parameters to their default values">↺ Reset to Defaults</button>
                 <input type="file" id="loadScenarioFile" accept=".json" style="display: none;">
             </div>
@@ -797,6 +867,43 @@
             </div>
             <div class="table-scroll">
                 <table id="dataTable" class="data-table"><thead></thead><tbody></tbody></table>
+            </div>
+        </div>
+
+        <div class="card comparison-card" id="comparisonCard">
+            <h2>Scenario Comparison</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+                📌 <strong>Save Snapshot</strong> captures the current results. Click a snapshot's <strong>name</strong> to make it the
+                <strong>baseline</strong>, and <strong>tick</strong> one or more snapshots to compare them all against it side by side.
+                Snapshots are stored in this browser and included in Print / PDF.
+            </p>
+            <div class="snapshot-bar" id="snapshotBar"></div>
+            <div id="comparisonBody" style="display: none;">
+                <div class="compare-controls">
+                    <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text); cursor: pointer;">
+                        <input type="checkbox" id="includeCurrentCol" checked> Include current (live) scenario
+                    </label>
+                    <button class="toolbar-btn" id="exportComparisonCsv" title="Download the comparison table as CSV">⬇️ Export Comparison (CSV)</button>
+                </div>
+                <div class="order-bar" id="compareOrderBar"></div>
+                <div class="verdict-row" id="comparisonVerdicts"></div>
+                <div style="overflow-x: auto;">
+                    <table class="comparison-table" id="comparisonTable"></table>
+                </div>
+                <div class="cmp-charts">
+                    <div>
+                        <div class="cmp-chart-title">Cumulative Tax — baseline (dashed grey) vs comparisons</div>
+                        <div class="cmp-chart-box"><canvas id="cmpTaxChart"></canvas></div>
+                    </div>
+                    <div>
+                        <div class="cmp-chart-title">Cumulative Excess — baseline (dashed grey) vs comparisons</div>
+                        <div class="cmp-chart-box"><canvas id="cmpExcessChart"></canvas></div>
+                    </div>
+                    <div class="cmp-chart-wide">
+                        <div class="cmp-chart-title">Pot Balances — EI solid / AI dotted, baseline dashed grey</div>
+                        <div class="cmp-chart-box"><canvas id="cmpPotChart"></canvas></div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -2516,6 +2623,485 @@
         });
     }
 
+    // ============================================================================
+    // SNAPSHOT & SCENARIO COMPARISON
+    // ============================================================================
+    const SNAPSHOT_STORAGE_KEY = 'pdc_snapshots_v1';
+    const COMPARE_UI_KEY = 'pdc_compare_ui_v1';
+    let snapshots = [];
+    let compareBaselineId = null;
+    let compareSelectedIds = [];   // snapshots ticked for side-by-side comparison
+    let compareOrder = [];         // display order of comparison columns (snapshot ids + '__current__')
+    let includeCurrent = true;     // show the live scenario as an extra column
+    let cmpTaxChart = null;
+    let cmpExcessChart = null;
+    let cmpPotChart = null;
+    // Column colours for comparison scenarios (baseline is always dashed grey)
+    const CMP_PALETTE = ['#2c5282', '#38a169', '#dd6b20', '#805ad5', '#e53e3e', '#319795', '#b7791f', '#c53030'];
+    const CMP_BASELINE_COLOR = '#4a5568';
+
+    function loadSnapshotsFromStorage() {
+        try {
+            const raw = localStorage.getItem(SNAPSHOT_STORAGE_KEY);
+            snapshots = raw ? JSON.parse(raw) : [];
+            if (!Array.isArray(snapshots)) snapshots = [];
+        } catch (e) { snapshots = []; }
+    }
+
+    function persistSnapshots() {
+        try { localStorage.setItem(SNAPSHOT_STORAGE_KEY, JSON.stringify(snapshots)); }
+        catch (e) { /* storage blocked/full — snapshots stay in memory for this session */ }
+    }
+
+    function saveCompareUi() {
+        try {
+            localStorage.setItem(COMPARE_UI_KEY, JSON.stringify({
+                baselineId: compareBaselineId, selectedIds: compareSelectedIds,
+                order: compareOrder, includeCurrent
+            }));
+        } catch (e) { /* ignore */ }
+    }
+
+    function loadCompareUi() {
+        try {
+            const raw = localStorage.getItem(COMPARE_UI_KEY);
+            if (!raw) return;
+            const ui = JSON.parse(raw);
+            if (ui.baselineId && snapshots.some(s => s.id === ui.baselineId)) compareBaselineId = ui.baselineId;
+            if (Array.isArray(ui.selectedIds)) compareSelectedIds = ui.selectedIds.filter(id => snapshots.some(s => s.id === id));
+            if (Array.isArray(ui.order)) compareOrder = ui.order.filter(id => typeof id === 'string');
+            if (ui.includeCurrent === false) includeCurrent = false;
+        } catch (e) { /* ignore */ }
+    }
+
+    // Ordered comparison columns: baseline first (dashed grey), then the other
+    // columns in the user's chosen order (dragged in the order bar; newly
+    // ticked snapshots and the live scenario append at the end).
+    function getComparisonColumns(currentData) {
+        const base = getBaseline();
+        if (!base) return [];
+        const cols = [{ id: base.id, name: base.name, metrics: base.metrics, fingerprint: base.fingerprint, isBaseline: true, color: CMP_BASELINE_COLOR }];
+        const wanted = compareSelectedIds.filter(id => id !== base.id && snapshots.some(s => s.id === id));
+        const orderIds = compareOrder.filter(id => wanted.includes(id) || (id === '__current__' && includeCurrent));
+        wanted.forEach(id => { if (!orderIds.includes(id)) orderIds.push(id); });
+        if (includeCurrent && !orderIds.includes('__current__')) orderIds.push('__current__');
+        compareOrder = orderIds.slice();
+        orderIds.forEach(id => {
+            if (id === '__current__') {
+                cols.push({ id, name: (state.scenarioName || 'Current') + ' (live)', metrics: computeMetrics(currentData), fingerprint: strategyFingerprint(), color: CMP_PALETTE[(cols.length - 1) % CMP_PALETTE.length] });
+                return;
+            }
+            const s = snapshots.find(x => x.id === id);
+            if (s) cols.push({ id: s.id, name: s.name, metrics: s.metrics, fingerprint: s.fingerprint, color: CMP_PALETTE[(cols.length - 1) % CMP_PALETTE.length] });
+        });
+        return cols;
+    }
+
+    // Drag-to-reorder pill bar: mirrors and drives the comparison column order.
+    function renderCompareOrderBar(cols) {
+        const bar = document.getElementById('compareOrderBar');
+        const compareCols = cols.slice(1);
+        if (!compareCols.length) { bar.innerHTML = ''; return; }
+        bar.innerHTML = '<span style="font-size:0.78rem;color:var(--text-muted);">COLUMN ORDER <em>(drag to reorder)</em>:</span>' +
+            compareCols.map(c => `<span class="order-pill" draggable="true" data-col="${c.id}" style="border-color:${c.color};" title="Drag to reorder columns"><span class="order-dot" style="background:${c.color};"></span>${c.name}</span>`).join('');
+        let dragId = null;
+        bar.querySelectorAll('.order-pill').forEach(pill => {
+            pill.addEventListener('dragstart', e => {
+                dragId = pill.dataset.col;
+                pill.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+            pill.addEventListener('dragend', () => {
+                dragId = null;
+                bar.querySelectorAll('.order-pill').forEach(p => p.classList.remove('dragging', 'drag-over'));
+            });
+            pill.addEventListener('dragover', e => {
+                e.preventDefault();
+                if (pill.dataset.col !== dragId) pill.classList.add('drag-over');
+            });
+            pill.addEventListener('dragleave', () => pill.classList.remove('drag-over'));
+            pill.addEventListener('drop', e => {
+                e.preventDefault();
+                const targetId = pill.dataset.col;
+                if (!dragId || dragId === targetId) return;
+                const from = compareOrder.indexOf(dragId);
+                const to = compareOrder.indexOf(targetId);
+                if (from === -1 || to === -1) return;
+                compareOrder.splice(to, 0, compareOrder.splice(from, 1)[0]);
+                saveCompareUi();
+                update();
+            });
+        });
+    }
+
+    function getBaseline() {
+        return snapshots.find(s => s.id === compareBaselineId) || null;
+    }
+
+    // Derive the full comparison metric set from a projection result set.
+    function computeMetrics(data) {
+        const drawYears = data.filter(d => d.anyoneDrawingDown);
+        const sumTax = arr => arr.reduce((s, d) => s + d.eugeneTax + d.annabelleTax, 0);
+        const depletionAge = (potKey, ageKey, phaseKey) => {
+            const row = data.find(d => d[phaseKey] === 'drawdown' && d[potKey] <= 0);
+            return row ? row[ageKey] : null;
+        };
+        const minPot = (potKey, phaseKey) => {
+            const rows = data.filter(d => d[phaseKey] === 'drawdown');
+            return rows.length ? Math.min(...rows.map(d => d[potKey])) : null;
+        };
+        const potAtAge = (potKey, ageKey, age) => {
+            const row = data.find(d => d[ageKey] === age);
+            return row ? row[potKey] : null;
+        };
+        let cumExcessEnd = 0, cumExcessAt75 = 0, runTax = 0, runExcess = 0;
+        const years = [], cumTax = [], cumExcess = [], eugPot = [], annPot = [];
+        for (const d of data) {
+            runTax += d.eugeneTax + d.annabelleTax;
+            if (d.excessFunds !== null) {
+                runExcess += d.excessFunds;
+                cumExcessEnd += d.excessFunds;
+                if (d.eugeneAge <= 75) cumExcessAt75 += d.excessFunds;
+            }
+            years.push(d.year); cumTax.push(runTax); cumExcess.push(runExcess);
+            eugPot.push(d.eugenePot); annPot.push(d.annabellePot);
+        }
+        const totalTax = sumTax(data);
+        const totalGross = data.reduce((s, d) => s + d.totalFamilyGross, 0);
+        return {
+            totalTax,
+            taxFirst5: sumTax(drawYears.slice(0, 5)),
+            effRate: totalGross > 0 ? totalTax / totalGross : 0,
+            totalTFC: data.reduce((s, d) => s + d.eugeneTFC + d.annabelleTFC, 0),
+            eugDepletionAge: depletionAge('eugenePot', 'eugeneAge', 'eugenePhase'),
+            annDepletionAge: depletionAge('annabellePot', 'annabelleAge', 'annabellePhase'),
+            eugMinPot: minPot('eugenePot', 'eugenePhase'),
+            annMinPot: minPot('annabellePot', 'annabellePhase'),
+            eugPotAt85: potAtAge('eugenePot', 'eugeneAge', 85),
+            annPotAt85: potAtAge('annabellePot', 'annabelleAge', 85),
+            cumExcessEnd,
+            cumExcessAt75,
+            firstDrawdownNet: drawYears.length ? drawYears[0].totalFamilyNet : null,
+            limitedYears: data.filter(d => d.eugeneIncomeLimited || d.annabelleIncomeLimited).length,
+            series: { years, cumTax, cumExcess, eugPot, annPot }
+        };
+    }
+
+    function strategyFingerprint() {
+        const fmtStrat = (p, lbl) => {
+            const phased = state[p + 'DrawdownStrategy'] === 'phased';
+            const lsTake = state[p + 'LumpSumTake'] && !phased;
+            const ls = lsTake ? `, 25% LS ${state[p + 'LumpSumYear']}` : '';
+            const dd = state[p + 'DrawdownStartYear'];
+            const tgt = state[p + 'TargetIncome'];
+            return `${lbl}: ${phased ? 'phased TFC' : 'standard'} from ${dd}, target £${Math.round(tgt).toLocaleString('en-GB')}${ls}`;
+        };
+        return `${fmtStrat('eugene', 'EI')} · ${fmtStrat('annabelle', 'AI')}`;
+    }
+
+    function takeSnapshot() {
+        const stamp = new Date().toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        const name = prompt('Name this snapshot:', `${state.scenarioName || 'Scenario'} — ${stamp}`);
+        if (!name) return;
+        const { results: data } = calculate();
+        snapshots.push({
+            id: 'snap_' + Date.now(),
+            name,
+            savedAt: new Date().toISOString(),
+            fingerprint: strategyFingerprint(),
+            metrics: computeMetrics(data)
+        });
+        persistSnapshots();
+        compareBaselineId = snapshots[snapshots.length - 1].id;
+        saveCompareUi();
+        renderSnapshotBar();
+        update();
+    }
+
+    function deleteSnapshot(id) {
+        snapshots = snapshots.filter(s => s.id !== id);
+        if (compareBaselineId === id) compareBaselineId = null;
+        compareSelectedIds = compareSelectedIds.filter(x => x !== id);
+        compareOrder = compareOrder.filter(x => x !== id);
+        persistSnapshots();
+        saveCompareUi();
+        renderSnapshotBar();
+        update();
+    }
+
+    function renderSnapshotBar() {
+        const bar = document.getElementById('snapshotBar');
+        if (!snapshots.length) {
+            bar.innerHTML = '<span style="font-size:0.85rem;color:var(--text-muted);">No snapshots yet — click <strong>📌 Save Snapshot</strong> above to capture the current scenario.</span>';
+            return;
+        }
+        bar.innerHTML = snapshots.map(s => {
+            const isBase = s.id === compareBaselineId;
+            const isCmp = compareSelectedIds.includes(s.id);
+            return `
+            <span class="snapshot-chip ${isBase ? 'selected' : ''} ${isCmp && !isBase ? 'comparing' : ''}">
+                <input type="checkbox" data-cmp="${s.id}" ${isCmp ? 'checked' : ''} title="Include in comparison">
+                <span class="chip-name" data-base="${s.id}" title="Saved ${new Date(s.savedAt).toLocaleString('en-GB')} — click to set as baseline">${s.name}</span>
+                ${isBase ? '<span class="chip-base-tag">BASELINE</span>' : ''}
+                <button class="chip-delete" data-del="${s.id}" title="Delete snapshot">✕</button>
+            </span>`;
+        }).join('');
+        bar.querySelectorAll('input[data-cmp]').forEach(cb => {
+            cb.addEventListener('change', () => {
+                const id = cb.dataset.cmp;
+                if (cb.checked) {
+                    // The baseline is already the reference column — no need to tick it
+                    if (id === compareBaselineId) { cb.checked = false; return; }
+                    if (!compareSelectedIds.includes(id)) compareSelectedIds.push(id);
+                } else {
+                    compareSelectedIds = compareSelectedIds.filter(x => x !== id);
+                }
+                saveCompareUi();
+                renderSnapshotBar();
+                update();
+            });
+        });
+        bar.querySelectorAll('.chip-name').forEach(el => {
+            el.addEventListener('click', () => {
+                const id = el.dataset.base;
+                if (compareBaselineId === id) return;
+                compareBaselineId = id;
+                compareSelectedIds = compareSelectedIds.filter(x => x !== id);
+                saveCompareUi();
+                renderSnapshotBar();
+                update();
+            });
+        });
+        bar.querySelectorAll('.chip-delete').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                const s = snapshots.find(x => x.id === btn.dataset.del);
+                if (s && confirm(`Delete snapshot "${s.name}"?`)) deleteSnapshot(s.id);
+            });
+        });
+    }
+
+    // Comparison table rows: [label, metric key, format, better direction]
+    const CMP_GROUPS = [
+        { label: '💰 Tax Efficiency', rows: [
+            ['Total family tax (lifetime)', 'totalTax', 'money', 'lower'],
+            ['Tax in first 5 drawdown years', 'taxFirst5', 'money', 'lower'],
+            ['Effective tax rate (tax ÷ gross)', 'effRate', 'pct', 'lower'],
+            ['Tax-free cash extracted (TFC)', 'totalTFC', 'money', 'higher'],
+        ]},
+        { label: '🏦 Pot Sustainability', rows: [
+            ['EI pot depletion age', 'eugDepletionAge', 'age', 'higher'],
+            ['AI pot depletion age', 'annDepletionAge', 'age', 'higher'],
+            ['EI pot at age 85', 'eugPotAt85', 'money', 'higher'],
+            ['AI pot at age 85', 'annPotAt85', 'money', 'higher'],
+            ['EI minimum pot (during drawdown)', 'eugMinPot', 'money', 'higher'],
+            ['AI minimum pot (during drawdown)', 'annMinPot', 'money', 'higher'],
+        ]},
+        { label: '📈 Income & Excess', rows: [
+            ['Cumulative excess (end of projection)', 'cumExcessEnd', 'money', 'higher'],
+            ['Cumulative excess at EI age 75', 'cumExcessAt75', 'money', 'higher'],
+            ['Net family income, first drawdown year', 'firstDrawdownNet', 'money', 'higher'],
+            ['Years income below target (pot-limited)', 'limitedYears', 'int', 'lower'],
+        ]},
+    ];
+
+    function fmtMetric(v, fmt) {
+        if (v === null || v === undefined) return '—';
+        if (fmt === 'money') return '£' + Math.round(v).toLocaleString('en-GB');
+        if (fmt === 'pct') return (v * 100).toFixed(1) + '%';
+        return String(Math.round(v));
+    }
+
+    // Delta between baseline (b) and current (c): text + css class.
+    // For 'age' metrics, null means "never depletes" — the best possible outcome.
+    function deltaInfo(b, c, fmt, better) {
+        const good = d => (better === 'higher' ? d > 0 : d < 0);
+        if (fmt === 'age') {
+            if (b == null && c == null) return { text: '—', cls: 'delta-same', score: 0 };
+            if (b == null) return { text: `now depletes (${c})`, cls: good(-1) ? 'delta-better' : 'delta-worse', score: good(-1) ? 1 : -1 };
+            if (c == null) return { text: 'never depletes', cls: good(1) ? 'delta-better' : 'delta-worse', score: good(1) ? 1 : -1 };
+            const d = c - b;
+            if (d === 0) return { text: '±0', cls: 'delta-same', score: 0 };
+            return { text: (d > 0 ? '+' : '−') + Math.abs(d) + ' yrs', cls: good(d) ? 'delta-better' : 'delta-worse', score: good(d) ? 1 : -1 };
+        }
+        if (b == null || c == null) return { text: '—', cls: 'delta-same', score: 0 };
+        const d = c - b;
+        const eps = fmt === 'pct' ? 0.0005 : 0.5;
+        if (Math.abs(d) < eps) return { text: '±0', cls: 'delta-same', score: 0 };
+        let text;
+        if (fmt === 'money') text = (d > 0 ? '+£' : '−£') + Math.abs(Math.round(d)).toLocaleString('en-GB');
+        else if (fmt === 'pct') text = (d > 0 ? '+' : '−') + (Math.abs(d) * 100).toFixed(1) + 'pp';
+        else text = (d > 0 ? '+' : '−') + Math.abs(Math.round(d));
+        return { text, cls: good(d) ? 'delta-better' : 'delta-worse', score: good(d) ? 1 : -1 };
+    }
+
+    function renderComparison(currentData) {
+        const body = document.getElementById('comparisonBody');
+        const base = getBaseline();
+        if (!base) {
+            body.style.display = 'none';
+            return;
+        }
+        body.style.display = 'block';
+        document.getElementById('includeCurrentCol').checked = includeCurrent;
+        const cols = getComparisonColumns(currentData);
+        const compareCols = cols.slice(1);
+
+        renderCompareOrderBar(cols);
+
+        // Metric table: baseline column + one column per comparison scenario,
+        // each comparison cell showing the value with its delta underneath.
+        let html = `<thead><tr><th>Metric</th><th>${base.name}<br><span style="text-transform:none;font-weight:400;">(baseline)</span></th>` +
+            compareCols.map(c => `<th style="color:${c.color};">${c.name}</th>`).join('') + '</tr></thead><tbody>';
+        CMP_GROUPS.forEach(g => {
+            html += `<tr class="group-row"><td colspan="${cols.length + 1}">${g.label}</td></tr>`;
+            g.rows.forEach(([label, key, fmt, better]) => {
+                html += `<tr><td>${label}</td><td>${fmtMetric(base.metrics[key], fmt)}</td>` +
+                    compareCols.map(c => {
+                        const d = deltaInfo(base.metrics[key], c.metrics[key], fmt, better);
+                        return `<td>${fmtMetric(c.metrics[key], fmt)}<div class="cell-delta ${d.cls}">${d.text}</div></td>`;
+                    }).join('') + '</tr>';
+            });
+        });
+        html += `<tr class="fingerprint-row"><td>Strategy</td><td>${base.fingerprint}</td>` +
+            compareCols.map(c => `<td style="text-align:left;">${c.fingerprint}</td>`).join('') + '</tr>';
+        html += '</tbody>';
+        document.getElementById('comparisonTable').innerHTML = html;
+
+        // One verdict chip per comparison column
+        const money = v => '£' + Math.abs(Math.round(v)).toLocaleString('en-GB');
+        document.getElementById('comparisonVerdicts').innerHTML = compareCols.map(c => {
+            let score = 0;
+            CMP_GROUPS.forEach(g => g.rows.forEach(([, key, fmt, better]) => {
+                score += deltaInfo(base.metrics[key], c.metrics[key], fmt, better).score;
+            }));
+            const taxD = c.metrics.totalTax - base.metrics.totalTax;
+            const exD = c.metrics.cumExcessEnd - base.metrics.cumExcessEnd;
+            const cls = score > 0 ? 'better' : score < 0 ? 'worse' : 'mixed';
+            return `<div class="comparison-verdict ${cls}" style="border-left: 4px solid ${c.color};">
+                ${c.name}: ${(taxD <= 0 ? '−' : '+') + money(taxD)} tax · ${(exD >= 0 ? '+' : '−') + money(exD)} excess</div>`;
+        }).join('');
+
+        drawComparisonCharts(cols);
+    }
+
+    function drawComparisonCharts(cols) {
+        const base = cols[0];
+        const years = base.metrics.series.years;
+        const moneyTicks = { callback: v => '£' + (v / 1000).toFixed(0) + 'k' };
+        const mkOpts = () => ({
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            scales: { y: { ticks: moneyTicks } },
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } }
+        });
+        // One line per scenario; baseline dashed grey, others solid in their colour
+        const line = (col, dataKey, extra = {}) => ({
+            label: col.name,
+            data: col.metrics.series[dataKey],
+            borderColor: col.color,
+            borderWidth: 2,
+            pointRadius: 0,
+            fill: false,
+            ...(col.isBaseline ? { borderDash: [6, 4] } : {}),
+            ...extra
+        });
+
+        if (cmpTaxChart) cmpTaxChart.destroy();
+        cmpTaxChart = new Chart(document.getElementById('cmpTaxChart'), {
+            type: 'line',
+            data: { labels: years, datasets: cols.map(c => line(c, 'cumTax')) },
+            options: mkOpts()
+        });
+
+        if (cmpExcessChart) cmpExcessChart.destroy();
+        cmpExcessChart = new Chart(document.getElementById('cmpExcessChart'), {
+            type: 'line',
+            data: { labels: years, datasets: cols.map(c => line(c, 'cumExcess')) },
+            options: mkOpts()
+        });
+
+        // Pot chart: EI solid, AI dotted — same colour per scenario
+        if (cmpPotChart) cmpPotChart.destroy();
+        cmpPotChart = new Chart(document.getElementById('cmpPotChart'), {
+            type: 'line',
+            data: { labels: years, datasets: cols.flatMap(c => [
+                line(c, 'eugPot', { label: `${c.name} — EI` }),
+                line(c, 'annPot', { label: `${c.name} — AI`, borderDash: c.isBaseline ? [2, 3] : [4, 3], borderWidth: 1.5 })
+            ]) },
+            options: mkOpts()
+        });
+    }
+
+    function exportComparisonCsv() {
+        const base = getBaseline();
+        if (!base) return;
+        const { results: data } = calculate();
+        const cols = getComparisonColumns(data);
+        const compareCols = cols.slice(1);
+        const rows = [['Metric', `Baseline: ${base.name}`, ...compareCols.map(c => c.name)]];
+        CMP_GROUPS.forEach(g => {
+            rows.push([g.label, ...cols.map(() => '')]);
+            g.rows.forEach(([label, key, fmt, better]) => {
+                rows.push([label, fmtMetric(base.metrics[key], fmt),
+                    ...compareCols.map(c => `${fmtMetric(c.metrics[key], fmt)} (${deltaInfo(base.metrics[key], c.metrics[key], fmt, better).text})`)]);
+            });
+        });
+        rows.push(['Strategy', base.fingerprint, ...compareCols.map(c => c.fingerprint)]);
+        const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+        const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `comparison_${base.name.replace(/[^a-z0-9]/gi, '_')}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    // Appends a compact comparison page to the print summary (only when a
+    // baseline snapshot is selected). Must run after updatePrintSummary.
+    function appendComparisonPrint() {
+        const base = getBaseline();
+        const ps = document.getElementById('printSummary');
+        if (!base || !ps || !ps.innerHTML) return;
+        const { results: data } = calculate();
+        const cols = getComparisonColumns(data);
+        const compareCols = cols.slice(1);
+        const cell = 'padding:2px 6px;border-bottom:1px solid #ccc;font-size:8pt;text-align:right;';
+        let rows = '';
+        CMP_GROUPS.forEach(g => {
+            rows += `<tr><td colspan="${cols.length + 1}" style="padding:5px 6px 2px;font-size:8pt;font-weight:bold;background:#eee;">${g.label}</td></tr>`;
+            g.rows.forEach(([label, key, fmt, better]) => {
+                rows += `<tr><td style="${cell}text-align:left;">${label}</td><td style="${cell}">${fmtMetric(base.metrics[key], fmt)}</td>` +
+                    compareCols.map(c => `<td style="${cell}">${fmtMetric(c.metrics[key], fmt)} <strong>(${deltaInfo(base.metrics[key], c.metrics[key], fmt, better).text})</strong></td>`).join('') + '</tr>';
+            });
+        });
+        const taxImg = cmpTaxChart ? cmpTaxChart.toBase64Image('image/png', 1) : '';
+        const excessImg = cmpExcessChart ? cmpExcessChart.toBase64Image('image/png', 1) : '';
+        const potImg = cmpPotChart ? cmpPotChart.toBase64Image('image/png', 1) : '';
+        ps.insertAdjacentHTML('beforeend', `
+            <div style="page-break-before:always;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#000;background:#fff;">
+                <div style="text-align:center;border-bottom:2px solid #1a365d;padding-bottom:4px;margin-bottom:8px;">
+                    <div style="font-size:13pt;font-weight:bold;color:#1a365d;">Scenario Comparison</div>
+                    <div style="font-size:8pt;color:#333;">Baseline: ${base.name} &nbsp;vs&nbsp; ${compareCols.map(c => c.name).join(', ') || '—'}</div>
+                </div>
+                <table style="width:100%;border-collapse:collapse;margin-bottom:10px;">
+                    <thead><tr>
+                        <th style="${cell}text-align:left;background:#ddd;">Metric</th>
+                        <th style="${cell}background:#ddd;">${base.name}</th>
+                        ${compareCols.map(c => `<th style="${cell}background:#ddd;">${c.name}</th>`).join('')}
+                    </tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+                <div style="font-size:7pt;color:#333;margin-bottom:8px;">
+                    ${cols.map(c => `<strong>${c.name}:</strong> ${c.fingerprint}`).join('<br>')}
+                </div>
+                ${taxImg ? `<div style="margin-bottom:8px;"><img src="${taxImg}" style="width:100%;max-height:270px;object-fit:contain;"></div>` : ''}
+                ${excessImg ? `<div style="margin-bottom:8px;"><img src="${excessImg}" style="width:100%;max-height:270px;object-fit:contain;"></div>` : ''}
+                ${potImg ? `<div><img src="${potImg}" style="width:100%;max-height:270px;object-fit:contain;"></div>` : ''}
+            </div>`);
+    }
+
     function update() {
         const { results: data, lumpSumInfo } = calculate();
         renderSummary(data, lumpSumInfo);
@@ -2523,6 +3109,8 @@
         renderTable(data);
         updateOptIndicators();
         updatePrintSummary(data, lumpSumInfo);
+        appendComparisonPrint();
+        renderComparison(data);
     }
 
     // ============================================================================
@@ -2535,6 +3123,7 @@
         
         // Update print summary with current data
         updatePrintSummary(data, lumpSumInfo);
+        appendComparisonPrint();
         
         // Small delay to ensure everything is rendered
         setTimeout(() => {
@@ -2850,6 +3439,18 @@
             }
         });
         document.getElementById('printScenario').addEventListener('click', printScenario);
+
+        // Snapshots & comparison
+        loadSnapshotsFromStorage();
+        loadCompareUi();
+        renderSnapshotBar();
+        document.getElementById('saveSnapshot').addEventListener('click', takeSnapshot);
+        document.getElementById('exportComparisonCsv').addEventListener('click', exportComparisonCsv);
+        document.getElementById('includeCurrentCol').addEventListener('change', e => {
+            includeCurrent = e.target.checked;
+            saveCompareUi();
+            update();
+        });
 
         // Initial render
         update();

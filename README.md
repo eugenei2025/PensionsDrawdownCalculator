@@ -24,6 +24,11 @@ static app — HTML, CSS and JavaScript with Chart.js. No build step.
 - Optimisers: depletion-age targeting and 20%-band tax optimisation, with
   automatic re-calculation when strategy or lump-sum settings change
 - Manual per-year income overrides by clicking Target cells
+- **Scenario snapshots & comparison**: snapshot any result set (stored in the
+  browser), pick a baseline, and compare it against the live scenario — key
+  metric delta table (tax, depletion ages, pots at 85, excess, TFC), overlaid
+  cumulative tax/excess and pot-balance charts, CSV export, and an extra
+  comparison page in the Print/PDF summary
 - Scenario save/load (JSON), reset to defaults, print/PDF summary
 
 ## Running
