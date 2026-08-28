@@ -852,6 +852,14 @@
             </div>
         </div>
         
+        <div class="chart-container">
+            <h2>Family Gross Income by Source</h2>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin:-10px 0 12px 0;">One stacked bar per year — family gross income split across EI's Parmenion drawdown, State, Avon &amp; Civil Service pensions and AI's Parmenion drawdown, State &amp; Teachers pensions. Living costs shown as a dashed line. Year, EI age and AI age along the bottom.</p>
+            <div id="drawdownMixChartWrapper" style="position: relative; height: 380px;">
+                <canvas id="drawdownMixChart"></canvas>
+            </div>
+        </div>
+        
         <div class="table-container">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
                 <div>
@@ -1527,11 +1535,13 @@
     let balanceChart = null;
     let incomeChart = null;
     let taxChart = null;
+    let drawdownMixChart = null;
     
     function drawCharts(data) {
         drawBalanceChart(data);
         drawIncomeChart(data);
         drawTaxChart(data);
+        drawDrawdownMixChart(data);
     }
     
     function drawBalanceChart(data) {
@@ -1873,6 +1883,121 @@
     
     function getTaxChartImage() {
         const canvas = document.getElementById('taxChart');
+        if (!canvas) return '';
+        return canvas.toDataURL('image/png', 1.0);
+    }
+
+    // Stacked bar chart: one bar per year showing how the family gross income
+    // is made up across all seven income sources (EI: Parmenion drawdown,
+    // State, Avon, Civil Service · AI: Parmenion drawdown, State, Teachers),
+    // with living costs overlaid as a line. X-axis shows year with EI and AI
+    // ages beneath it.
+    function drawDrawdownMixChart(data) {
+        const canvas = document.getElementById('drawdownMixChart');
+        if (!canvas) return;
+
+        // Multi-line category labels: year, EI age, AI age along the bottom
+        const labels = data.map(d => [String(d.year), `EI ${d.eugeneAge}`, `AI ${d.annabelleAge}`]);
+
+        const ds = (label, values, color) => ({
+            label,
+            data: values,
+            backgroundColor: color,
+            borderColor: color,
+            borderWidth: 0,
+            stack: 'family',
+            barPercentage: 0.75,
+            categoryPercentage: 0.9
+        });
+
+        const datasets = [
+            ds('EI Parmenion Drawdown',      data.map(d => d.eugeneDrawdown),      '#1a365d'),
+            ds('EI State Pension',           data.map(d => d.eugeneStatePension),  '#2c5282'),
+            ds('EI Avon Pension',            data.map(d => d.eugeneAvon),          '#4299e1'),
+            ds('EI Civil Service Pension',   data.map(d => d.eugeneCivil),         '#90cdf4'),
+            ds('AI Parmenion Drawdown',      data.map(d => d.annabelleDrawdown),   '#276749'),
+            ds('AI State Pension',           data.map(d => d.annabelleStatePension),'#38a169'),
+            ds('AI Teachers Pension',        data.map(d => d.annabelleTeachers),   '#9ae6b4'),
+            {
+                label: 'Living Costs',
+                data: data.map(d => d.anyoneDrawingDown ? d.livingCosts : null),
+                type: 'line',
+                borderColor: '#d69e2e',
+                backgroundColor: '#d69e2e',
+                borderWidth: 2,
+                borderDash: [6, 4],
+                pointRadius: 0,
+                tension: 0.3,
+                spanGaps: false
+            }
+        ];
+
+        if (drawdownMixChart) {
+            drawdownMixChart.data.labels = labels;
+            datasets.forEach((d, i) => { drawdownMixChart.data.datasets[i].data = d.data; });
+            drawdownMixChart.update('none');
+        } else {
+            const ctx = canvas.getContext('2d');
+            drawdownMixChart = new Chart(ctx, {
+                type: 'bar',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { boxWidth: 12, font: { size: 11 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: items => {
+                                    const d = data[items[0].dataIndex];
+                                    return `${d.year} — EI age ${d.eugeneAge} · AI age ${d.annabelleAge}`;
+                                },
+                                label: c => {
+                                    if (c.parsed.y === null) return null;
+                                    return `${c.dataset.label}: £${Math.round(c.parsed.y).toLocaleString()}`;
+                                },
+                                footer: items => {
+                                    const d = data[items[0].dataIndex];
+                                    const lines = [`Family gross: £${Math.round(d.totalFamilyGross).toLocaleString()}`];
+                                    if (d.anyoneDrawingDown) {
+                                        lines.push(`Living costs: £${Math.round(d.livingCosts).toLocaleString()}`);
+                                    }
+                                    return lines;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            ticks: { maxRotation: 0, autoSkip: true, font: { size: 10 } },
+                            grid: { display: false }
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Family Gross Income (£)',
+                                font: { size: 11 }
+                            },
+                            ticks: {
+                                callback: v => '£' + (v/1000).toFixed(0) + 'k'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    function getDrawdownMixChartImage() {
+        const canvas = document.getElementById('drawdownMixChart');
         if (!canvas) return '';
         return canvas.toDataURL('image/png', 1.0);
     }
@@ -2320,6 +2445,7 @@
         const chartImage = getChartImage();
         const incomeChartImage = getIncomeChartImage();
         const taxChartImage = getTaxChartImage();
+        const drawdownMixChartImage = getDrawdownMixChartImage();
         
         // Age milestone calculations - year based on EI's age, AI age calculated dynamically
         const milestones = [
@@ -2478,6 +2604,10 @@
                 <div style="flex:1;border:1px solid #ccc;padding:2px;">
                     <div style="font-size:6pt;font-weight:bold;color:#1a365d;margin-bottom:1px;text-align:center;">Tax Utilisation</div>
                     <img src="${taxChartImage}" style="width:100%;height:75px;display:block;" />
+                </div>
+                <div style="flex:1;border:1px solid #ccc;padding:2px;">
+                    <div style="font-size:6pt;font-weight:bold;color:#1a365d;margin-bottom:1px;text-align:center;">Family Income by Source</div>
+                    <img src="${drawdownMixChartImage}" style="width:100%;height:75px;display:block;" />
                 </div>
             </div>
 

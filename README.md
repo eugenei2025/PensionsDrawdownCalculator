@@ -7,6 +7,9 @@ static app — HTML, CSS and JavaScript with Chart.js. No build step.
 
 - Year-by-year projection (2025–2063) of DC (Parmenion) pots, DB pensions
   (State, Avon, Civil Service, Teachers), tax, net income and family excess
+- Charts: pot balances, income/excess, tax utilisation, and a stacked bar
+  chart of family gross income split by income source with a living-costs
+  overlay line
 - Accumulation phase with date-aware monthly contributions and growth
 - Per-pension growth rates with on/off toggles
 - UK income tax with personal allowance, basic/higher bands and threshold
@@ -34,7 +37,10 @@ static app — HTML, CSS and JavaScript with Chart.js. No build step.
 ## Running
 
 It is a static site: open `index.html` or serve the folder with any static
-server. Deployed via GitHub Pages from the `main` branch root.
+server. For a live preview with auto-reload friendly hosting, run
+`npm run dev` (starts `server.js`, a tiny dependency-free static server, on
+port 7100 by default; override with `npm run dev -- --port 8080`).
+Deployed via GitHub Pages from the `main` branch root.
 
 ## Disclaimer
 
