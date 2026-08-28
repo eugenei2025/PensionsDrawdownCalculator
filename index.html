@@ -163,7 +163,11 @@
             border: 1px solid var(--border); margin-bottom: 24px;
         }
         
-        .chart-container h2 { font-size: 1.1rem; color: var(--primary); margin-bottom: 16px; }
+        .chart-container h2 { font-size: 1.1rem; color: var(--primary); margin-bottom: 16px; cursor: pointer; user-select: none; display: flex; align-items: center; gap: 8px; }
+        
+        .chart-container.collapsed h2 { margin-bottom: 0; }
+        .chart-container.collapsed > *:not(h2) { display: none; }
+        .chart-toggle { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border: 1px solid var(--border); border-radius: 5px; font-size: 0.85rem; font-weight: bold; color: var(--primary); background: var(--bg); flex-shrink: 0; }
         
         .table-container {
             background: var(--card-bg); border-radius: 10px;
@@ -2002,6 +2006,41 @@
         return canvas.toDataURL('image/png', 1.0);
     }
 
+    // Collapsible chart sections: a + / − toggle on each chart title.
+    // Collapsed charts show only the title; state persists in localStorage.
+    function initChartToggles() {
+        let stored = [];
+        try { stored = JSON.parse(localStorage.getItem('chartCollapsed') || '[]'); } catch (e) {}
+        document.querySelectorAll('.chart-container').forEach(container => {
+            const h2 = container.querySelector('h2');
+            const canvas = container.querySelector('canvas');
+            if (!h2 || !canvas) return;
+            const id = canvas.id;
+            const btn = document.createElement('span');
+            btn.className = 'chart-toggle';
+            h2.prepend(btn);
+            const setState = collapsed => {
+                container.classList.toggle('collapsed', collapsed);
+                btn.textContent = collapsed ? '+' : '−';
+                btn.title = collapsed ? 'Show chart' : 'Hide chart';
+            };
+            setState(stored.includes(id));
+            h2.addEventListener('click', () => {
+                const collapsed = !container.classList.contains('collapsed');
+                setState(collapsed);
+                let arr = [];
+                try { arr = JSON.parse(localStorage.getItem('chartCollapsed') || '[]'); } catch (e) {}
+                const next = collapsed ? [...new Set([...arr, id])] : arr.filter(x => x !== id);
+                localStorage.setItem('chartCollapsed', JSON.stringify(next));
+                // Canvas resizes to 0 while hidden; restore on expand
+                if (!collapsed && typeof Chart !== 'undefined') {
+                    const ch = Chart.getChart(canvas);
+                    if (ch) ch.resize();
+                }
+            });
+        });
+    }
+
     // ============================================================================
     // TABLE RENDERING
     // ============================================================================
@@ -3584,6 +3623,7 @@
 
         // Initial render
         update();
+        initChartToggles();
         
         window.addEventListener('resize', () => {
             const { results } = calculate();
