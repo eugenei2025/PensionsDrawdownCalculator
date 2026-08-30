@@ -168,6 +168,13 @@
         .chart-container.collapsed h2 { margin-bottom: 0; }
         .chart-container.collapsed > *:not(h2) { display: none; }
         .chart-toggle { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border: 1px solid var(--border); border-radius: 5px; font-size: 0.85rem; font-weight: bold; color: var(--primary); background: var(--bg); flex-shrink: 0; }
+
+        /* Collapsible non-chart sections (Key Outcomes, Year-by-Year table) */
+        h2.collapsible { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+        .section-title.collapsed + .summary-grid { display: none !important; }
+        .table-container.collapsed .table-scroll,
+        .table-container.collapsed .collapse-on-toggle { display: none !important; }
+        .table-container.collapsed > div:first-child { margin-bottom: 0; }
         
         .table-container {
             background: var(--card-bg); border-radius: 10px;
@@ -351,6 +358,25 @@
            SCENARIO COMPARISON
            ============================================================================ */
         .comparison-card { margin-top: 20px; }
+        .comparison-card h2 { cursor: pointer; user-select: none; display: flex; align-items: center; gap: 8px; }
+        .comparison-card.collapsed h2 { margin-bottom: 0; }
+        .comparison-card.collapsed > *:not(h2) { display: none !important; }
+        .comparison-table.yearly th { white-space: nowrap; vertical-align: bottom; }
+        .comparison-table.yearly td { white-space: nowrap; }
+        .comparison-table.yearly tr.total-row td { font-weight: 700; border-top: 2px solid var(--primary); background: #f7fafc; }
+        .comparison-table.yearly tr.flags-row td {
+            font-size: 0.72rem; color: var(--text-muted); text-align: left; white-space: normal;
+            line-height: 1.4; padding: 4px 10px; border-bottom: 2px solid var(--border); background: #f8fafc;
+        }
+        .cmp-vth { vertical-align: bottom !important; padding: 6px 4px !important; }
+        .cmp-v {
+            writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap;
+            font-size: 0.75rem; font-weight: 700; text-transform: none; letter-spacing: 0;
+            max-height: 150px; overflow: hidden; text-overflow: ellipsis; margin: 0 auto;
+        }
+        .comparison-table.yearly thead tr.cmp-vrow th { height: 165px; }
+        .comparison-table.yearly tr.flags-row td:first-child { font-weight: 700; text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.04em; }
+        .cmp-sub { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
         .snapshot-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
         .snapshot-chip {
             display: inline-flex; align-items: center; gap: 6px;
@@ -714,8 +740,21 @@
                     </div>
                     <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">Calculated as 25% of the Parmenion pot value (Pot 2 share) at the start of the chosen year, after growth. Not available with the phased drawdown strategy.</p>
                 </div>
+
+                <div class="db-section">
+                    <h3>Mortality Planning</h3>
+                    <div class="toggle-group" style="margin-bottom: 8px;">
+                        <label class="toggle"><input type="checkbox" id="eugeneDeathEnabled"><span class="toggle-slider"></span></label>
+                        <label>EI dies during the projection</label>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group"><label>Year of Death <span class="year-hint">(applies from start of year)</span></label><input type="number" id="eugeneDeathYear" value="2045" step="1" min="2025" max="2063"></div>
+                        <div class="input-group"><label>Living Cost Reduction (%) <span class="year-hint">(single vs couple)</span></label><input type="number" id="eugeneDeathLivingReduction" value="25" step="5" min="0" max="100"></div>
+                    </div>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">From that year EI's State, Avon &amp; Civil Service pensions and his Parmenion drawdown stop. AI then receives <strong>50% of the Avon &amp; Civil Service pensions</strong> (taxable, still growing at their rates) and his Parmenion pot passes to her — withdrawals are <strong>tax-free if death is before age 75</strong>, otherwise taxed as her income. AI's own drawdown target then draws on the inherited pot once her own is exhausted. Family living costs reduce by the stated percentage from the year of death (one person instead of two).</p>
+                </div>
             </div>
-            
+
             <div class="card ai-card">
                 <div class="person-header">
                     <span class="person-badge secondary">AI</span>
@@ -793,6 +832,19 @@
                     </div>
                     <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">Calculated as 25% of the Parmenion pot value at the start of the chosen year, after growth. Not available with the phased drawdown strategy.</p>
                 </div>
+
+                <div class="db-section">
+                    <h3>Mortality Planning</h3>
+                    <div class="toggle-group" style="margin-bottom: 8px;">
+                        <label class="toggle"><input type="checkbox" id="annabelleDeathEnabled"><span class="toggle-slider"></span></label>
+                        <label>AI dies during the projection</label>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group"><label>Year of Death <span class="year-hint">(applies from start of year)</span></label><input type="number" id="annabelleDeathYear" value="2050" step="1" min="2025" max="2063"></div>
+                        <div class="input-group"><label>Living Cost Reduction (%) <span class="year-hint">(single vs couple)</span></label><input type="number" id="annabelleDeathLivingReduction" value="25" step="5" min="0" max="100"></div>
+                    </div>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">From that year AI's State &amp; Teachers pensions and her Parmenion drawdown stop. EI then receives a <strong>£2,000/yr survivor pension</strong> (taxable, grown at the Teachers rate) plus a <strong>one-off £80,000 tax-free payment</strong> in that year, and her Parmenion pot passes to him — withdrawals are <strong>tax-free if death is before age 75</strong>, otherwise taxed as his income. EI's own drawdown target then draws on the inherited pot once his own is exhausted. Family living costs reduce by the stated percentage from the year of death (one person instead of two).</p>
+                </div>
             </div>
         </div>
 
@@ -832,7 +884,7 @@
 
         <div id="alertsSection" class="alerts-section" style="display: none;"></div>
 
-        <h2 class="section-title">Key Outcomes</h2>
+        <h2 class="section-title" id="keyOutcomesTitle">Key Outcomes</h2>
         <div class="summary-grid" id="summaryCards"></div>
 
         <div class="chart-container">
@@ -864,18 +916,19 @@
             </div>
         </div>
         
-        <div class="table-container">
+        <div class="table-container" id="projectionsTable">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
                 <div>
                     <h2 style="margin: 0;">Year-by-Year Projections</h2>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 4px 0 0 0;">
+                    <p class="collapse-on-toggle" style="font-size: 0.85rem; color: var(--text-muted); margin: 4px 0 0 0;">
                         💡 Click <strong>EI Target</strong> or <strong>AI Target</strong> cells to manually adjust income.<br>
                         🔒 Cells locked when pot is depleted. Living costs only apply once drawdown begins.<br>
-                        💷 <strong>TFC</strong> = tax-free cash used from the remaining 25% entitlement within each phased Parmenion (DC) withdrawal. Phased withdrawals first fill any unused personal allowance (0% tax), then draw TFC — so the entitlement lasts as long as possible. DB pensions are always fully taxable.
+                        💷 <strong>TFC</strong> = tax-free cash used from the remaining 25% entitlement within each phased Parmenion (DC) withdrawal. Phased withdrawals first fill any unused personal allowance (0% tax), then draw TFC — so the entitlement lasts as long as possible. DB pensions are always fully taxable.<br>
+                        † = death year of that person (mortality planning); survivor pensions are included in the survivor's <strong>DB</strong> column, any one-off survivor payment in their <strong>Net</strong>, and living costs reduce by the mortality-section percentage from the death year.
                     </p>
-                    <div id="optionsStatus" style="font-size: 0.85rem; color: var(--text); margin-top: 8px; padding: 8px 10px; background: #f8fafc; border: 1px solid var(--border); border-radius: 6px; line-height: 1.6;"></div>
+                    <div id="optionsStatus" class="collapse-on-toggle" style="font-size: 0.85rem; color: var(--text); margin-top: 8px; padding: 8px 10px; background: #f8fafc; border: 1px solid var(--border); border-radius: 6px; line-height: 1.6;"></div>
                 </div>
-                <button class="clear-all-overrides" id="clearAllOverrides" style="display: none;">Clear All Adjustments</button>
+                <button class="clear-all-overrides collapse-on-toggle" id="clearAllOverrides" style="display: none;">Clear All Adjustments</button>
             </div>
             <div class="table-scroll">
                 <table id="dataTable" class="data-table"><thead></thead><tbody></tbody></table>
@@ -886,7 +939,9 @@
             <h2>Scenario Comparison</h2>
             <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
                 📌 <strong>Save Snapshot</strong> captures the current results. Click a snapshot's <strong>name</strong> to make it the
-                <strong>baseline</strong>, and <strong>tick</strong> one or more snapshots to compare them all against it side by side.
+                <strong>baseline</strong>, and <strong>tick</strong> one or more snapshots to compare them against it — the year-by-year
+                table below shows each year's family <strong>excess income</strong> (net income over living costs) and <strong>total tax</strong>,
+                with ▲/▼ deltas vs the baseline. Each column notes any 25% lump sums taken and phased Parmenion drawdown.
                 Snapshots are stored in this browser and included in Print / PDF.
             </p>
             <div class="snapshot-bar" id="snapshotBar"></div>
@@ -900,7 +955,7 @@
                 <div class="order-bar" id="compareOrderBar"></div>
                 <div class="verdict-row" id="comparisonVerdicts"></div>
                 <div style="overflow-x: auto;">
-                    <table class="comparison-table" id="comparisonTable"></table>
+                    <table class="comparison-table yearly" id="comparisonTable"></table>
                 </div>
                 <div class="cmp-charts">
                     <div>
@@ -954,6 +1009,16 @@
     // Pension commencement lump sum rate: 25% of the crystallised fund.
     const PCLS_RATE = 0.25;
 
+    // Survivor benefits (per the pension death-benefit rules):
+    // - If EI dies, AI receives 50% of his Avon & Civil Service (DB) pensions.
+    // - If AI dies, EI receives a £2,000/yr survivor pension plus a one-off
+    //   £80,000 tax-free payment.
+    // - DC (Parmenion) pots pass to the survivor: withdrawals are tax-free if
+    //   death occurs before age 75, otherwise taxed as the survivor's income.
+    const SURVIVOR_DB_SHARE = 0.5;
+    const EI_SURVIVOR_PENSION = 2000;
+    const EI_SURVIVOR_LUMP = 80000;
+
     function getDefaultState() {
         return {
         avonGrowthRate: 0.03, avonGrowthEnabled: true,
@@ -992,6 +1057,8 @@
         incomeOverrides: {},
         eugeneOptimisation: null,
         annabelleOptimisation: null,
+        eugeneDeathEnabled: false, eugeneDeathYear: 2045, eugeneDeathLivingReduction: 25,
+        annabelleDeathEnabled: false, annabelleDeathYear: 2050, annabelleDeathLivingReduction: 25,
         scenarioName: null
         };
     }
@@ -1113,6 +1180,20 @@
         let annStateVal = state.annabelleStateAmount;
         let annTeachVal = state.annabelleTeachersAmount;
 
+        // Mortality planning. When a person dies (from the start of the death
+        // year): their own pensions/drawdown stop, their Parmenion pot passes
+        // to the survivor as a separate inherited pot, and the survivor
+        // receives the survivor benefits described in the mortality sections.
+        // Inherited-pot withdrawals are tax-free when death is before age 75,
+        // otherwise taxed as the survivor's income.
+        const eugDeathYear = state.eugeneDeathEnabled ? Math.min(2063, Math.max(2025, state.eugeneDeathYear || 2063)) : null;
+        const annDeathYear = state.annabelleDeathEnabled ? Math.min(2063, Math.max(2025, state.annabelleDeathYear || 2063)) : null;
+        let eugInheritedPot = 0, annInheritedPot = 0;      // inherited FROM the other person
+        let eugInheritedTaxFree = false, annInheritedTaxFree = false;
+        let eugTransferYear = null, annTransferYear = null;
+        let annSurvAvon = 0, annSurvCivil = 0;             // AI's survivor DB pensions after EI dies
+        let eugSurvPension = 0;                            // EI's £2,000/yr survivor pension after AI dies
+
         for (let year = 2025; year <= 2063; year++) {
             const yi = year - 2025;
             const infl = getInflationRate(year);
@@ -1124,9 +1205,38 @@
             const annPhase = year >= state.annabelleDrawdownStartYear ? 'drawdown' : 'accumulation';
             const eugPhased = state.eugeneDrawdownStrategy === 'phased';
             const annPhased = state.annabelleDrawdownStrategy === 'phased';
-            
-            // Determine if anyone is drawing down (for living costs)
-            const anyoneDrawingDown = eugPhase === 'drawdown' || annPhase === 'drawdown';
+
+            const eugDead = eugDeathYear !== null && year >= eugDeathYear;
+            const annDead = annDeathYear !== null && year >= annDeathYear;
+
+            // Death transfers, applied at the start of the death year (before
+            // that year's growth or withdrawals): the deceased's Parmenion pot
+            // passes to the survivor and survivor benefits begin.
+            if (eugDeathYear === year) {
+                annInheritedPot = eugenePot;
+                annInheritedTaxFree = eugAge < 75;
+                annTransferYear = year;
+                eugenePot = 0;
+                annSurvAvon = eugAvonVal * SURVIVOR_DB_SHARE;
+                annSurvCivil = eugCivilVal * SURVIVOR_DB_SHARE;
+            }
+            if (annDeathYear === year) {
+                eugInheritedPot = annabellePot;
+                eugInheritedTaxFree = annAge < 75;
+                eugTransferYear = year;
+                annabellePot = 0;
+                eugSurvPension = EI_SURVIVOR_PENSION;
+            }
+            // One-off tax-free payment to EI in AI's death year only
+            const eugSurvLumpYr = (annDeathYear === year && !eugDead) ? EI_SURVIVOR_LUMP : 0;
+            // Survivor DB income this year (only while the survivor is alive)
+            const eugSurv = (annDead && !eugDead) ? eugSurvPension : 0;
+            const annSurv = (eugDead && !annDead) ? (annSurvAvon + annSurvCivil) : 0;
+
+            // Determine if anyone is drawing down (for living costs); once
+            // both have died there is no household income or living cost.
+            const bothDead = eugDead && annDead;
+            const anyoneDrawingDown = !bothDead && (eugPhase === 'drawdown' || annPhase === 'drawdown');
 
             // ========== EUGENE ==========
             let eugBase = state.eugeneTargetIncome, eugHasOvr = false;
@@ -1145,15 +1255,15 @@
             if (!eugHasOvr && state.eugeneInflation && eugPhase === 'drawdown') {
                 eugBase = state.eugeneTargetIncome * cumInfl;
             }
-            let eugTarget = eugPhase === 'drawdown' ? eugBase : 0;
+            let eugTarget = (!eugDead && eugPhase === 'drawdown') ? eugBase : 0;
 
-            const eugState = year >= state.eugeneStateYear ? eugStateVal : 0;
-            const eugAvon = year >= state.eugeneAvonYear ? eugAvonVal : 0;
-            const eugCivil = year >= state.eugeneCivilYear ? eugCivilVal : 0;
-            const eugDB = eugState + eugAvon + eugCivil;
+            const eugState = (!eugDead && year >= state.eugeneStateYear) ? eugStateVal : 0;
+            const eugAvon = (!eugDead && year >= state.eugeneAvonYear) ? eugAvonVal : 0;
+            const eugCivil = (!eugDead && year >= state.eugeneCivilYear) ? eugCivilVal : 0;
+            const eugDB = eugState + eugAvon + eugCivil + eugSurv;
 
             // Accumulation phase with date-aware contributions and growth
-            if (eugPhase === 'accumulation') {
+            if (eugPhase === 'accumulation' && !eugDead) {
                 // Contributions (only from contrib start month)
                 if (year >= eugContribStart.year && year <= state.eugeneContribStopYear) {
                     let monthsContrib = 12;
@@ -1177,7 +1287,7 @@
 
             // Lump sum extraction (25% of pot at start of extraction year; not with phased strategy)
             let eugLS = 0;
-            if (!eugLSTaken && state.eugeneLumpSumTake && !eugPhased && year === state.eugeneLumpSumYear) {
+            if (!eugDead && !eugLSTaken && state.eugeneLumpSumTake && !eugPhased && year === state.eugeneLumpSumYear) {
                 const initTotal = state.eugenePot1Balance + state.eugenePot2Balance;
                 const pot2Ratio = initTotal > 0 ? state.eugenePot2Balance / initTotal : 0;
                 eugLS = eugenePot * pot2Ratio * PCLS_RATE;
@@ -1191,8 +1301,14 @@
             // needed (target - DB); part is tax-free, funded from the remaining
             // TFC entitlement (up to 25% of the crystallised tranche, i.e. W/3)
             // until the entitlement is exhausted, then fully taxable.
-            let eugDraw = 0, eugTFC = 0, eugLimited = false;
-            if (eugPhase === 'drawdown') {
+            // The own pot is used first; any shortfall is drawn from the pot
+            // inherited from AI (tax-free if she died before 75).
+            let eugDraw = 0, eugDrawInh = 0, eugTFC = 0, eugLimited = false;
+            // Inherited Parmenion pot grows each year after transfer
+            if (eugInheritedPot > 0 && !eugDead && state.dcGrowthEnabled && year > eugTransferYear) {
+                eugInheritedPot *= (1 + state.dcGrowthRate);
+            }
+            if (eugPhase === 'drawdown' && !eugDead) {
                 // Auto entitlement: 25% of EI's Pot 2 share of the pot entering drawdown
                 if (eugPhased && eugTFCRemaining === null) {
                     const initTotal = state.eugenePot1Balance + state.eugenePot2Balance;
@@ -1203,31 +1319,43 @@
                     eugenePot *= (1 + state.dcGrowthRate);
                 }
                 const gap = Math.max(0, eugTarget - eugDB);
+                let eugDrawOwn = 0;
                 if (eugenePot >= gap) {
-                    eugDraw = gap;
-                    eugenePot -= eugDraw;
+                    eugDrawOwn = gap;
+                    eugenePot -= gap;
                 } else {
-                    eugDraw = Math.max(0, eugenePot);
+                    eugDrawOwn = Math.max(0, eugenePot);
                     eugenePot = 0;
-                    eugLimited = true;
-                    eugTarget = eugDB + eugDraw;
                 }
                 // TFC: the taxable element first fills any unused personal
                 // allowance (taxed at 0%); only the remainder of the withdrawal
                 // draws on the TFC entitlement (capped at 25% of the pot, the
                 // maximum crystallisation can release). This preserves the
                 // entitlement instead of wasting the personal allowance.
-                if (eugPhased && eugDraw > 0 && eugTFCRemaining > 0) {
+                if (eugPhased && eugDrawOwn > 0 && eugTFCRemaining > 0) {
                     const eugPA = getTaxThresholds(year).personalAllowance;
                     const eugUnusedPA = Math.max(0, eugPA - eugDB);
-                    const eugDesiredTFC = Math.max(0, eugDraw - eugUnusedPA);
-                    eugTFC = Math.min(eugTFCRemaining, eugDesiredTFC, eugDraw, PCLS_RATE * (eugenePot + eugDraw));
+                    const eugDesiredTFC = Math.max(0, eugDrawOwn - eugUnusedPA);
+                    eugTFC = Math.min(eugTFCRemaining, eugDesiredTFC, eugDrawOwn, PCLS_RATE * (eugenePot + eugDrawOwn));
                     eugTFCRemaining -= eugTFC;
                 }
+                const eugShortfall = gap - eugDrawOwn;
+                if (eugShortfall > 0 && eugInheritedPot > 0) {
+                    eugDrawInh = Math.min(eugShortfall, eugInheritedPot);
+                    eugInheritedPot -= eugDrawInh;
+                }
+                eugDraw = eugDrawOwn + eugDrawInh;
+                if (eugDraw < gap) {
+                    eugLimited = true;
+                    eugTarget = eugDB + eugDraw;
+                }
             }
-            const eugGross = eugDB + (eugDraw - eugTFC);
+            // Taxable gross: DB income + taxable part of the own-pot draw +
+            // the inherited-pot draw when AI died at 75+ (before 75 it is
+            // tax-free and stays out of gross).
+            const eugGross = eugDB + (eugDraw - eugDrawInh - eugTFC) + (eugInheritedTaxFree ? 0 : eugDrawInh);
             const eugTax = calculateTax(eugGross, year);
-            const eugNet = eugDB + eugDraw - eugTax;
+            const eugNet = eugDB + eugDraw - eugTax + eugSurvLumpYr;
 
             // ========== ANNABELLE ==========
             let annBase = state.annabelleTargetIncome, annHasOvr = false;
@@ -1246,13 +1374,13 @@
             if (!annHasOvr && state.annabelleInflation && annPhase === 'drawdown') {
                 annBase = state.annabelleTargetIncome * cumInfl;
             }
-            let annTarget = annPhase === 'drawdown' ? annBase : 0;
+            let annTarget = (!annDead && annPhase === 'drawdown') ? annBase : 0;
 
-            const annState = year >= state.annabelleStateYear ? annStateVal : 0;
-            const annTeach = year >= state.annabelleTeachersYear ? annTeachVal : 0;
-            const annDB = annState + annTeach;
+            const annState = (!annDead && year >= state.annabelleStateYear) ? annStateVal : 0;
+            const annTeach = (!annDead && year >= state.annabelleTeachersYear) ? annTeachVal : 0;
+            const annDB = annState + annTeach + annSurv;
 
-            if (annPhase === 'accumulation') {
+            if (annPhase === 'accumulation' && !annDead) {
                 if (year >= annContribStart.year && year <= state.annabelleContribStopYear) {
                     let monthsContrib = 12;
                     if (year === annContribStart.year) {
@@ -1272,7 +1400,7 @@
             }
 
             let annLS = 0;
-            if (!annLSTaken && state.annabelleLumpSumTake && !annPhased && year === state.annabelleLumpSumYear) {
+            if (!annDead && !annLSTaken && state.annabelleLumpSumTake && !annPhased && year === state.annabelleLumpSumYear) {
                 annLS = annabellePot * PCLS_RATE;
                 annabellePot -= annLS;
                 annLSTaken = true;
@@ -1280,8 +1408,12 @@
                 lumpSumInfo.annabelleLumpSumYear = year;
             }
 
-            let annDraw = 0, annTFC = 0, annLimited = false;
-            if (annPhase === 'drawdown') {
+            let annDraw = 0, annDrawInh = 0, annTFC = 0, annLimited = false;
+            // Inherited Parmenion pot (from EI) grows each year after transfer
+            if (annInheritedPot > 0 && !annDead && state.dcGrowthEnabled && year > annTransferYear) {
+                annInheritedPot *= (1 + state.dcGrowthRate);
+            }
+            if (annPhase === 'drawdown' && !annDead) {
                 // Auto entitlement: 25% of the pot entering drawdown
                 if (annPhased && annTFCRemaining === null) {
                     annTFCRemaining = PCLS_RATE * annabellePot;
@@ -1290,28 +1422,40 @@
                     annabellePot *= (1 + state.dcGrowthRate);
                 }
                 const gap = Math.max(0, annTarget - annDB);
+                let annDrawOwn = 0;
                 if (annabellePot >= gap) {
-                    annDraw = gap;
-                    annabellePot -= annDraw;
+                    annDrawOwn = gap;
+                    annabellePot -= gap;
                 } else {
-                    annDraw = Math.max(0, annabellePot);
+                    annDrawOwn = Math.max(0, annabellePot);
                     annabellePot = 0;
-                    annLimited = true;
-                    annTarget = annDB + annDraw;
                 }
                 // TFC: taxable element fills any unused personal allowance
                 // first (taxed at 0%); only the remainder draws on the TFC
                 // entitlement (capped at 25% of the pot). Preserves the
                 // entitlement instead of wasting the personal allowance.
-                if (annPhased && annDraw > 0 && annTFCRemaining > 0) {
+                if (annPhased && annDrawOwn > 0 && annTFCRemaining > 0) {
                     const annPA = getTaxThresholds(year).personalAllowance;
                     const annUnusedPA = Math.max(0, annPA - annDB);
-                    const annDesiredTFC = Math.max(0, annDraw - annUnusedPA);
-                    annTFC = Math.min(annTFCRemaining, annDesiredTFC, annDraw, PCLS_RATE * (annabellePot + annDraw));
+                    const annDesiredTFC = Math.max(0, annDrawOwn - annUnusedPA);
+                    annTFC = Math.min(annTFCRemaining, annDesiredTFC, annDrawOwn, PCLS_RATE * (annabellePot + annDrawOwn));
                     annTFCRemaining -= annTFC;
                 }
+                const annShortfall = gap - annDrawOwn;
+                if (annShortfall > 0 && annInheritedPot > 0) {
+                    annDrawInh = Math.min(annShortfall, annInheritedPot);
+                    annInheritedPot -= annDrawInh;
+                }
+                annDraw = annDrawOwn + annDrawInh;
+                if (annDraw < gap) {
+                    annLimited = true;
+                    annTarget = annDB + annDraw;
+                }
             }
-            const annGross = annDB + (annDraw - annTFC);
+            // Taxable gross: DB income (incl. survivor pensions) + taxable
+            // part of the own-pot draw + the inherited-pot draw when EI died
+            // at 75+ (before 75 it is tax-free and stays out of gross).
+            const annGross = annDB + (annDraw - annDrawInh - annTFC) + (annInheritedTaxFree ? 0 : annDrawInh);
             const annTax = calculateTax(annGross, year);
             const annNet = annDB + annDraw - annTax;
 
@@ -1329,28 +1473,42 @@
                 eugStateVal *= (1 + state.statePensionGrowthRate);
                 annStateVal *= (1 + state.statePensionGrowthRate);
             }
+            // Survivor DB pensions keep growing at the source pension's rate
+            if (annSurvAvon > 0 && state.avonGrowthEnabled) annSurvAvon *= (1 + state.avonGrowthRate);
+            if (annSurvCivil > 0 && state.civilGrowthEnabled) annSurvCivil *= (1 + state.civilGrowthRate);
+            if (eugSurvPension > 0 && state.teachersGrowthEnabled) eugSurvPension *= (1 + state.teachersGrowthRate);
 
             const totGross = eugGross + annGross;
             const totNet = eugNet + annNet;
             
-            // Living costs only apply once someone is drawing down
-            const living = anyoneDrawingDown 
-                ? (state.livingCostsInflation ? state.annualLivingCosts * cumInfl : state.annualLivingCosts)
-                : 0;
+            // Living costs only apply once someone is drawing down. After a
+            // death, the survivor's household costs drop by the reduction set
+            // in that person's mortality section (single vs couple).
+            let livingReduction = 0;
+            if (eugDead && !annDead) livingReduction = (state.eugeneDeathLivingReduction || 0) / 100;
+            else if (annDead && !eugDead) livingReduction = (state.annabelleDeathLivingReduction || 0) / 100;
+            livingReduction = Math.min(1, Math.max(0, livingReduction));
+            const livingBase = state.livingCostsInflation ? state.annualLivingCosts * cumInfl : state.annualLivingCosts;
+            const living = anyoneDrawingDown ? livingBase * (1 - livingReduction) : 0;
             const excessFunds = anyoneDrawingDown ? totNet - living : null;
 
             results.push({
                 year, inflationRate: infl, eugeneAge: eugAge, annabelleAge: annAge,
                 eugenePhase: eugPhase, annabellePhase: annPhase, anyoneDrawingDown,
+                eugeneDeceased: eugDead, annabelleDeceased: annDead,
                 eugeneTargetGross: eugTarget, annabelleTargetGross: annTarget,
                 eugeneHasOverride: eugHasOvr, annabelleHasOverride: annHasOvr,
                 eugeneStatePension: eugState, eugeneAvon: eugAvon, eugeneCivil: eugCivil,
-                eugeneDrawdown: eugDraw, eugenePot: Math.max(0, eugenePot),
+                eugeneSurvivorPension: eugSurv, eugeneSurvivorLump: eugSurvLumpYr,
+                annabelleSurvivorPension: annSurv,
+                eugeneDrawdown: eugDraw, eugenePot: eugDead ? 0 : Math.max(0, eugenePot + eugInheritedPot),
+                eugeneInheritedPot: Math.max(0, eugInheritedPot),
                 eugeneTFC: eugTFC, eugenePhased: eugPhased,
                 eugeneTFCRemaining: (eugPhased && eugTFCRemaining !== null) ? Math.max(0, eugTFCRemaining) : null,
                 eugeneGross: eugGross, eugeneTax: eugTax, eugeneNet: eugNet, eugeneIncomeLimited: eugLimited,
                 annabelleStatePension: annState, annabelleTeachers: annTeach,
-                annabelleDrawdown: annDraw, annabellePot: Math.max(0, annabellePot),
+                annabelleDrawdown: annDraw, annabellePot: annDead ? 0 : Math.max(0, annabellePot + annInheritedPot),
+                annabelleInheritedPot: Math.max(0, annInheritedPot),
                 annabelleTFC: annTFC, annabellePhased: annPhased,
                 annabelleTFCRemaining: (annPhased && annTFCRemaining !== null) ? Math.max(0, annTFCRemaining) : null,
                 annabelleGross: annGross, annabelleTax: annTax, annabelleNet: annNet, annabelleIncomeLimited: annLimited,
@@ -1866,7 +2024,6 @@
                         y2: {
                             type: 'linear',
                             position: 'right',
-                            beginAtZero: true,
                             title: {
                                 display: true,
                                 text: 'Cumulative (£)',
@@ -2011,6 +2168,12 @@
     function initChartToggles() {
         let stored = [];
         try { stored = JSON.parse(localStorage.getItem('chartCollapsed') || '[]'); } catch (e) {}
+        const persist = (id, collapsed) => {
+            let arr = [];
+            try { arr = JSON.parse(localStorage.getItem('chartCollapsed') || '[]'); } catch (e) {}
+            const next = collapsed ? [...new Set([...arr, id])] : arr.filter(x => x !== id);
+            localStorage.setItem('chartCollapsed', JSON.stringify(next));
+        };
         document.querySelectorAll('.chart-container').forEach(container => {
             const h2 = container.querySelector('h2');
             const canvas = container.querySelector('canvas');
@@ -2028,10 +2191,7 @@
             h2.addEventListener('click', () => {
                 const collapsed = !container.classList.contains('collapsed');
                 setState(collapsed);
-                let arr = [];
-                try { arr = JSON.parse(localStorage.getItem('chartCollapsed') || '[]'); } catch (e) {}
-                const next = collapsed ? [...new Set([...arr, id])] : arr.filter(x => x !== id);
-                localStorage.setItem('chartCollapsed', JSON.stringify(next));
+                persist(id, collapsed);
                 // Canvas resizes to 0 while hidden; restore on expand
                 if (!collapsed && typeof Chart !== 'undefined') {
                     const ch = Chart.getChart(canvas);
@@ -2039,6 +2199,52 @@
                 }
             });
         });
+        // The Scenario Comparison card collapses the same way (no single canvas,
+        // so it is wired separately; comparison charts resize on expand).
+        const cmp = document.getElementById('comparisonCard');
+        if (cmp) {
+            const h2 = cmp.querySelector('h2');
+            const btn = document.createElement('span');
+            btn.className = 'chart-toggle';
+            h2.prepend(btn);
+            const setState = collapsed => {
+                cmp.classList.toggle('collapsed', collapsed);
+                btn.textContent = collapsed ? '+' : '−';
+                btn.title = collapsed ? 'Show scenario comparison' : 'Hide scenario comparison';
+            };
+            setState(stored.includes('comparisonCard'));
+            h2.addEventListener('click', () => {
+                const collapsed = !cmp.classList.contains('collapsed');
+                setState(collapsed);
+                persist('comparisonCard', collapsed);
+                if (!collapsed) [cmpTaxChart, cmpExcessChart, cmpPotChart].forEach(ch => ch && ch.resize());
+            });
+        }
+        // Key Outcomes and Year-by-Year Projections sections: same + / − toggle.
+        const wireSection = (cont, h2, id, label) => {
+            const btn = document.createElement('span');
+            btn.className = 'chart-toggle';
+            h2.prepend(btn);
+            h2.classList.add('collapsible');
+            const setState = collapsed => {
+                cont.classList.toggle('collapsed', collapsed);
+                btn.textContent = collapsed ? '+' : '−';
+                btn.title = collapsed ? `Show ${label}` : `Hide ${label}`;
+            };
+            setState(stored.includes(id));
+            h2.addEventListener('click', () => {
+                const collapsed = !cont.classList.contains('collapsed');
+                setState(collapsed);
+                persist(id, collapsed);
+            });
+        };
+        const koTitle = document.getElementById('keyOutcomesTitle');
+        if (koTitle) wireSection(koTitle, koTitle, 'keyOutcomes', 'key outcomes');
+        const projTable = document.getElementById('projectionsTable');
+        if (projTable) {
+            const h2 = projTable.querySelector('h2');
+            if (h2) wireSection(projTable, h2, 'projectionsTable', 'year-by-year projections');
+        }
     }
 
     // ============================================================================
@@ -2054,8 +2260,8 @@
             return `<td class="${rem <= 0 ? 'negative' : ''}" style="font-size:0.75rem;color:${rem > 0 ? '#805ad5' : ''};">${fmt(rem)}</td>`;
         };
         tbody.innerHTML = data.map(r => {
-            const eEx = r.eugenePot <= 0 && r.eugenePhase === 'drawdown';
-            const aEx = r.annabellePot <= 0 && r.annabellePhase === 'drawdown';
+            const eEx = r.eugenePot <= 0 && r.eugenePhase === 'drawdown' && !r.eugeneDeceased;
+            const aEx = r.annabellePot <= 0 && r.annabellePhase === 'drawdown' && !r.annabelleDeceased;
             const isEugeneStart = r.year === state.eugeneDrawdownStartYear;
             const isAnnabelleStart = r.year === state.annabelleDrawdownStartYear;
             
@@ -2064,15 +2270,22 @@
             if (eEx || aEx) cls = 'exhausted';
             else if (r.eugeneIncomeLimited || r.annabelleIncomeLimited) cls = 'income-limited';
 
-            // Age cells with drawdown start indicator
-            const eugAgeCell = isEugeneStart 
-                ? `<td style="background:#dbeafe;font-weight:bold;">▶ ${r.eugeneAge}</td>`
-                : `<td>${r.eugeneAge}</td>`;
-            const annAgeCell = isAnnabelleStart 
-                ? `<td style="background:#d1fae5;font-weight:bold;">▶ ${r.annabelleAge}</td>`
-                : `<td>${r.annabelleAge}</td>`;
+            // Age cells with drawdown start indicator / death marker (†)
+            const eugDeathYr = state.eugeneDeathEnabled && r.year === state.eugeneDeathYear;
+            const annDeathYr = state.annabelleDeathEnabled && r.year === state.annabelleDeathYear;
+            const eugAgeCell = eugDeathYr
+                ? `<td style="background:#fed7d7;font-weight:bold;" title="EI dies this year — pensions and drawdown stop, pot passes to AI">† ${r.eugeneAge}</td>`
+                : isEugeneStart
+                    ? `<td style="background:#dbeafe;font-weight:bold;">▶ ${r.eugeneAge}</td>`
+                    : `<td${r.eugeneDeceased ? ' style="color:#a0aec0;"' : ''}>${r.eugeneDeceased ? '† ' : ''}${r.eugeneAge}</td>`;
+            const annAgeCell = annDeathYr
+                ? `<td style="background:#fed7d7;font-weight:bold;" title="AI dies this year — pensions and drawdown stop, pot passes to EI">† ${r.annabelleAge}</td>`
+                : isAnnabelleStart
+                    ? `<td style="background:#d1fae5;font-weight:bold;">▶ ${r.annabelleAge}</td>`
+                    : `<td${r.annabelleDeceased ? ' style="color:#a0aec0;"' : ''}>${r.annabelleDeceased ? '† ' : ''}${r.annabelleAge}</td>`;
             
-            const tCell = (p, ph, amt, lim, ovr) => {
+            const tCell = (p, ph, amt, lim, ovr, deceased) => {
+                if (deceased) return '<td style="color:#a0aec0;">†</td>';
                 if (ph === 'accumulation') return '<td>-</td>';
                 if (lim) return `<td class="locked-cell">${fmt(amt)} 🔒</td>`;
                 return `<td class="${ovr ? 'editable-cell has-override' : 'editable-cell'}" data-year="${r.year}" data-person="${p}" data-value="${Math.round(amt)}">${fmt(amt)}</td>`;
@@ -2083,7 +2296,7 @@
                 ? `<td class="${r.excessFunds<0?'negative':'positive'}">${fmt(r.excessFunds)}</td>`
                 : `<td class="pre-drawdown">-</td>`;
             
-            return `<tr class="${cls}"><td>${r.year}</td><td>${(r.inflationRate*100).toFixed(1)}%</td>${eugAgeCell}${tCell('eugene',r.eugenePhase,r.eugeneTargetGross,r.eugeneIncomeLimited,r.eugeneHasOverride)}<td>${r.eugeneStatePension>0?fmt(r.eugeneStatePension):'-'}</td><td>${(r.eugeneAvon+r.eugeneCivil)>0?fmt(r.eugeneAvon+r.eugeneCivil):'-'}</td><td>${r.eugeneDrawdown>0?fmt(r.eugeneDrawdown):(r.eugenePhase==='drawdown'?'£0':'-')}</td><td>${r.eugeneTFC>0?fmt(r.eugeneTFC):(r.eugenePhase==='drawdown'&&r.eugenePhased?'£0':'-')}</td>${fmtTFCLeft(r.eugeneTFCRemaining,r.eugenePhased,r.eugenePhase)}<td class="${eEx?'negative':''}">${fmt(r.eugenePot)}</td><td>${fmt(r.eugeneGross)}</td><td>${fmt(r.eugeneTax)}</td><td>${fmt(r.eugeneNet)}</td>${annAgeCell}${tCell('annabelle',r.annabellePhase,r.annabelleTargetGross,r.annabelleIncomeLimited,r.annabelleHasOverride)}<td>${r.annabelleStatePension>0?fmt(r.annabelleStatePension):'-'}</td><td>${r.annabelleTeachers>0?fmt(r.annabelleTeachers):'-'}</td><td>${r.annabelleDrawdown>0?fmt(r.annabelleDrawdown):(r.annabellePhase==='drawdown'?'£0':'-')}</td><td>${r.annabelleTFC>0?fmt(r.annabelleTFC):(r.annabellePhase==='drawdown'&&r.annabellePhased?'£0':'-')}</td>${fmtTFCLeft(r.annabelleTFCRemaining,r.annabellePhased,r.annabellePhase)}<td class="${aEx?'negative':''}">${fmt(r.annabellePot)}</td><td>${fmt(r.annabelleGross)}</td><td>${fmt(r.annabelleTax)}</td><td>${fmt(r.annabelleNet)}</td><td>${fmt(r.totalFamilyGross)}</td><td>${fmt(r.totalFamilyNet)}</td>${excessDisplay}</tr>`;
+            return `<tr class="${cls}"><td>${r.year}</td><td>${(r.inflationRate*100).toFixed(1)}%</td>${eugAgeCell}${tCell('eugene',r.eugenePhase,r.eugeneTargetGross,r.eugeneIncomeLimited,r.eugeneHasOverride,r.eugeneDeceased)}<td>${r.eugeneStatePension>0?fmt(r.eugeneStatePension):'-'}</td><td>${(r.eugeneAvon+r.eugeneCivil+r.eugeneSurvivorPension)>0?fmt(r.eugeneAvon+r.eugeneCivil+r.eugeneSurvivorPension):'-'}</td><td>${r.eugeneDrawdown>0?fmt(r.eugeneDrawdown):(r.eugenePhase==='drawdown'?'£0':'-')}</td><td>${r.eugeneTFC>0?fmt(r.eugeneTFC):(r.eugenePhase==='drawdown'&&r.eugenePhased?'£0':'-')}</td>${fmtTFCLeft(r.eugeneTFCRemaining,r.eugenePhased,r.eugenePhase)}<td class="${eEx?'negative':''}">${fmt(r.eugenePot)}</td><td>${fmt(r.eugeneGross)}</td><td>${fmt(r.eugeneTax)}</td><td>${fmt(r.eugeneNet)}${r.eugeneSurvivorLump>0?`<div style="font-size:0.7rem;color:#805ad5;" title="One-off tax-free survivor payment after AI's death">incl. ${fmt(r.eugeneSurvivorLump)} survivor payment</div>`:''}</td>${annAgeCell}${tCell('annabelle',r.annabellePhase,r.annabelleTargetGross,r.annabelleIncomeLimited,r.annabelleHasOverride,r.annabelleDeceased)}<td>${r.annabelleStatePension>0?fmt(r.annabelleStatePension):'-'}</td><td>${(r.annabelleTeachers+r.annabelleSurvivorPension)>0?fmt(r.annabelleTeachers+r.annabelleSurvivorPension):'-'}</td><td>${r.annabelleDrawdown>0?fmt(r.annabelleDrawdown):(r.annabellePhase==='drawdown'?'£0':'-')}</td><td>${r.annabelleTFC>0?fmt(r.annabelleTFC):(r.annabellePhase==='drawdown'&&r.annabellePhased?'£0':'-')}</td>${fmtTFCLeft(r.annabelleTFCRemaining,r.annabellePhased,r.annabellePhase)}<td class="${aEx?'negative':''}">${fmt(r.annabellePot)}</td><td>${fmt(r.annabelleGross)}</td><td>${fmt(r.annabelleTax)}</td><td>${fmt(r.annabelleNet)}</td><td>${fmt(r.totalFamilyGross)}</td><td>${fmt(r.totalFamilyNet)}</td>${excessDisplay}</tr>`;
         }).join('');
         
         tbody.querySelectorAll('.editable-cell').forEach(c => c.addEventListener('click', handleCellClick));
@@ -2313,6 +2526,19 @@
         if (state.eugeneDrawdownStrategy === 'phased') mpaaNote('EI', state.eugeneDrawdownStartYear, state.eugeneContribStopYear);
         if (state.annabelleDrawdownStrategy === 'phased') mpaaNote('AI', state.annabelleDrawdownStartYear, state.annabelleContribStopYear);
 
+        // Mortality planning notices
+        const deathNote = (person, year, birthday, what) => {
+            const age = getAgeInYear(birthday, year);
+            const taxNote = age < 75
+                ? 'the Parmenion pot passes with <strong>tax-free</strong> withdrawals (death before 75)'
+                : 'the Parmenion pot passes with withdrawals <strong>taxed at the survivor\'s marginal rate</strong> (death at 75+)';
+            alerts += `<div class="alert-box" style="border-color:#805ad5;background:#faf5ff;"><h3 style="color:#553c9a;">† ${person} dies in ${year} (age ${age})</h3><p>${what}; ${taxNote}. Their own pensions and drawdown stop from ${year}.</p></div>`;
+        };
+        if (state.eugeneDeathEnabled) deathNote('EI', state.eugeneDeathYear, state.eugeneBirthday,
+            `AI receives 50% of EI's Avon &amp; Civil Service pensions (taxable); family living costs reduce by ${state.eugeneDeathLivingReduction}%`);
+        if (state.annabelleDeathEnabled) deathNote('AI', state.annabelleDeathYear, state.annabelleBirthday,
+            `EI receives a £2,000/yr survivor pension plus a one-off £80,000 tax-free payment; family living costs reduce by ${state.annabelleDeathLivingReduction}%`);
+
         alertsSection.innerHTML = alerts ? `<h2 class="section-title" style="color:#c53030;">⚠️ Alerts &amp; Notices</h2>` + alerts : '';
         alertsSection.style.display = alerts ? 'block' : 'none';
         
@@ -2448,8 +2674,8 @@
         const pct = v => (v * 100).toFixed(1) + '%';
         const yn = v => v ? 'Yes' : 'No';
 
-        const eugEx = data.find(d => d.eugenePot <= 0 && d.eugenePhase === 'drawdown');
-        const annEx = data.find(d => d.annabellePot <= 0 && d.annabellePhase === 'drawdown');
+        const eugEx = data.find(d => d.eugenePot <= 0 && d.eugenePhase === 'drawdown' && !d.eugeneDeceased);
+        const annEx = data.find(d => d.annabellePot <= 0 && d.annabellePhase === 'drawdown' && !d.annabelleDeceased);
         
         // Additional key outcomes
         const lastYear = data[data.length - 1];
@@ -2677,6 +2903,7 @@
                     ${row('Contrib', fmt(state.eugeneMonthlyContrib) + '/mo to ' + state.eugeneContribStopYear)}
                     ${row('Balance Valid', state.eugeneBalanceValidFrom)}
                     ${row('Pot Total', fmt(state.eugenePot1Balance + state.eugenePot2Balance))}
+                    ${row('Mortality', state.eugeneDeathEnabled ? 'Dies ' + state.eugeneDeathYear + ' (living −' + state.eugeneDeathLivingReduction + '%)' : 'Not modelled')}
                 </div>
                 <div style="border:1px solid #ccc;padding:3px;">
                     <div style="font-size:7.5pt;font-weight:bold;color:#1a365d;border-bottom:1px solid #ccc;margin-bottom:2px;padding-bottom:1px;">AI Parameters</div>
@@ -2686,6 +2913,7 @@
                     ${row('Contrib', fmt(state.annabelleMonthlyContrib) + '/mo to ' + state.annabelleContribStopYear)}
                     ${row('Balance Valid', state.annabelleBalanceValidFrom)}
                     ${row('Starting Balance', fmt(state.annabelleStartingBalance))}
+                    ${row('Mortality', state.annabelleDeathEnabled ? 'Dies ' + state.annabelleDeathYear + ' (living −' + state.annabelleDeathLivingReduction + '%)' : 'Not modelled')}
                 </div>
                 <div style="border:1px solid #ccc;padding:3px;">
                     <div style="font-size:7.5pt;font-weight:bold;color:#1a365d;border-bottom:1px solid #ccc;margin-bottom:2px;padding-bottom:1px;">EI DB Pensions</div>
@@ -2772,7 +3000,13 @@
             { id: 'annabelleLumpSumYear', key: 'annabelleLumpSumYear' },
             { id: 'annabelleLumpSumTake', key: 'annabelleLumpSumTake', isCheckbox: true },
             { id: 'annabelleTFCEntitlement', key: 'annabelleTFCEntitlement' },
-            { id: 'annabelleTFCAuto', key: 'annabelleTFCAuto', isCheckbox: true }
+            { id: 'annabelleTFCAuto', key: 'annabelleTFCAuto', isCheckbox: true },
+            { id: 'eugeneDeathEnabled', key: 'eugeneDeathEnabled', isCheckbox: true },
+            { id: 'eugeneDeathYear', key: 'eugeneDeathYear' },
+            { id: 'eugeneDeathLivingReduction', key: 'eugeneDeathLivingReduction' },
+            { id: 'annabelleDeathEnabled', key: 'annabelleDeathEnabled', isCheckbox: true },
+            { id: 'annabelleDeathYear', key: 'annabelleDeathYear' },
+            { id: 'annabelleDeathLivingReduction', key: 'annabelleDeathLivingReduction' }
         ];
         
         bindings.forEach(({ id, key, transform, isCheckbox, isMonth, isDate }) => {
@@ -2857,7 +3091,7 @@
         compareOrder = orderIds.slice();
         orderIds.forEach(id => {
             if (id === '__current__') {
-                cols.push({ id, name: (state.scenarioName || 'Current') + ' (live)', metrics: computeMetrics(currentData), fingerprint: strategyFingerprint(), color: CMP_PALETTE[(cols.length - 1) % CMP_PALETTE.length] });
+                cols.push({ id, name: (state.scenarioName || 'Current') + ' (live)', metrics: computeMetrics(currentData), fingerprint: strategyFingerprint(), flags: strategyFlags(), color: CMP_PALETTE[(cols.length - 1) % CMP_PALETTE.length] });
                 return;
             }
             const s = snapshots.find(x => x.id === id);
@@ -2911,12 +3145,12 @@
     function computeMetrics(data) {
         const drawYears = data.filter(d => d.anyoneDrawingDown);
         const sumTax = arr => arr.reduce((s, d) => s + d.eugeneTax + d.annabelleTax, 0);
-        const depletionAge = (potKey, ageKey, phaseKey) => {
-            const row = data.find(d => d[phaseKey] === 'drawdown' && d[potKey] <= 0);
+        const depletionAge = (potKey, ageKey, phaseKey, decKey) => {
+            const row = data.find(d => d[phaseKey] === 'drawdown' && d[potKey] <= 0 && !d[decKey]);
             return row ? row[ageKey] : null;
         };
-        const minPot = (potKey, phaseKey) => {
-            const rows = data.filter(d => d[phaseKey] === 'drawdown');
+        const minPot = (potKey, phaseKey, decKey) => {
+            const rows = data.filter(d => d[phaseKey] === 'drawdown' && !d[decKey]);
             return rows.length ? Math.min(...rows.map(d => d[potKey])) : null;
         };
         const potAtAge = (potKey, ageKey, age) => {
@@ -2925,8 +3159,10 @@
         };
         let cumExcessEnd = 0, cumExcessAt75 = 0, runTax = 0, runExcess = 0;
         const years = [], cumTax = [], cumExcess = [], eugPot = [], annPot = [];
+        const yearly = [];
         for (const d of data) {
-            runTax += d.eugeneTax + d.annabelleTax;
+            const yrTax = d.eugeneTax + d.annabelleTax;
+            runTax += yrTax;
             if (d.excessFunds !== null) {
                 runExcess += d.excessFunds;
                 cumExcessEnd += d.excessFunds;
@@ -2934,6 +3170,10 @@
             }
             years.push(d.year); cumTax.push(runTax); cumExcess.push(runExcess);
             eugPot.push(d.eugenePot); annPot.push(d.annabellePot);
+            yearly.push({
+                year: d.year, eiAge: d.eugeneAge, aiAge: d.annabelleAge,
+                tax: yrTax, excess: d.excessFunds
+            });
         }
         const totalTax = sumTax(data);
         const totalGross = data.reduce((s, d) => s + d.totalFamilyGross, 0);
@@ -2942,18 +3182,52 @@
             taxFirst5: sumTax(drawYears.slice(0, 5)),
             effRate: totalGross > 0 ? totalTax / totalGross : 0,
             totalTFC: data.reduce((s, d) => s + d.eugeneTFC + d.annabelleTFC, 0),
-            eugDepletionAge: depletionAge('eugenePot', 'eugeneAge', 'eugenePhase'),
-            annDepletionAge: depletionAge('annabellePot', 'annabelleAge', 'annabellePhase'),
-            eugMinPot: minPot('eugenePot', 'eugenePhase'),
-            annMinPot: minPot('annabellePot', 'annabellePhase'),
+            eugDepletionAge: depletionAge('eugenePot', 'eugeneAge', 'eugenePhase', 'eugeneDeceased'),
+            annDepletionAge: depletionAge('annabellePot', 'annabelleAge', 'annabellePhase', 'annabelleDeceased'),
+            eugMinPot: minPot('eugenePot', 'eugenePhase', 'eugeneDeceased'),
+            annMinPot: minPot('annabellePot', 'annabellePhase', 'annabelleDeceased'),
             eugPotAt85: potAtAge('eugenePot', 'eugeneAge', 85),
             annPotAt85: potAtAge('annabellePot', 'annabelleAge', 85),
             cumExcessEnd,
             cumExcessAt75,
             firstDrawdownNet: drawYears.length ? drawYears[0].totalFamilyNet : null,
             limitedYears: data.filter(d => d.eugeneIncomeLimited || d.annabelleIncomeLimited).length,
-            series: { years, cumTax, cumExcess, eugPot, annPot }
+            series: { years, cumTax, cumExcess, eugPot, annPot },
+            yearly
         };
+    }
+
+    // Lump-sum / drawdown-strategy flags per person, captured from the current
+    // inputs at snapshot time (or live for the current scenario column).
+    function strategyFlags() {
+        const person = p => {
+            const phased = state[p + 'DrawdownStrategy'] === 'phased';
+            const lumpSums = [];
+            if (p === 'eugene') {
+                if (state.eugeneAvonLumpSumTake) lumpSums.push({ label: 'Avon', year: state.eugeneAvonLumpSumYear });
+                if (state.eugeneCivilLumpSumTake) lumpSums.push({ label: 'Civil Service', year: state.eugeneCivilLumpSumYear });
+            } else {
+                if (state.annabelleTeachersLumpSumTake) lumpSums.push({ label: 'Teachers', year: state.annabelleTeachersLumpSumYear });
+            }
+            // Parmenion (DC) one-off 25% lump sum only applies when NOT phasing
+            if (state[p + 'LumpSumTake'] && !phased) lumpSums.push({ label: 'Parmenion', year: state[p + 'LumpSumYear'] });
+            const deathYear = state[p + 'DeathEnabled'] ? state[p + 'DeathYear'] : null;
+            return { phased, lumpSums, deathYear };
+        };
+        return { eugene: person('eugene'), annabelle: person('annabelle') };
+    }
+
+    // One-line-per-person summary of the flags, for table headers / print.
+    function flagsSummary(flags) {
+        if (!flags) return null;
+        const per = (lbl, f) => {
+            const bits = [];
+            if (f.lumpSums && f.lumpSums.length) bits.push('25% LS ' + f.lumpSums.map(l => `${l.label} '${String(l.year).slice(-2)}`).join(' + '));
+            if (f.phased) bits.push('phased Parmenion');
+            if (f.deathYear) bits.push(`†${f.deathYear}`);
+            return `${lbl}: ${bits.length ? bits.join(' · ') : 'no lump sum · standard'}`;
+        };
+        return `${per('EI', flags.eugene)}<br>${per('AI', flags.annabelle)}`;
     }
 
     function strategyFingerprint() {
@@ -2963,7 +3237,8 @@
             const ls = lsTake ? `, 25% LS ${state[p + 'LumpSumYear']}` : '';
             const dd = state[p + 'DrawdownStartYear'];
             const tgt = state[p + 'TargetIncome'];
-            return `${lbl}: ${phased ? 'phased TFC' : 'standard'} from ${dd}, target £${Math.round(tgt).toLocaleString('en-GB')}${ls}`;
+            const death = state[p + 'DeathEnabled'] ? `, dies ${state[p + 'DeathYear']}` : '';
+            return `${lbl}: ${phased ? 'phased TFC' : 'standard'} from ${dd}, target £${Math.round(tgt).toLocaleString('en-GB')}${ls}${death}`;
         };
         return `${fmtStrat('eugene', 'EI')} · ${fmtStrat('annabelle', 'AI')}`;
     }
@@ -2978,6 +3253,7 @@
             name,
             savedAt: new Date().toISOString(),
             fingerprint: strategyFingerprint(),
+            flags: strategyFlags(),
             metrics: computeMetrics(data)
         });
         persistSnapshots();
@@ -3050,39 +3326,40 @@
         });
     }
 
-    // Comparison table rows: [label, metric key, format, better direction]
-    const CMP_GROUPS = [
-        { label: '💰 Tax Efficiency', rows: [
-            ['Total family tax (lifetime)', 'totalTax', 'money', 'lower'],
-            ['Tax in first 5 drawdown years', 'taxFirst5', 'money', 'lower'],
-            ['Effective tax rate (tax ÷ gross)', 'effRate', 'pct', 'lower'],
-            ['Tax-free cash extracted (TFC)', 'totalTFC', 'money', 'higher'],
-        ]},
-        { label: '🏦 Pot Sustainability', rows: [
-            ['EI pot depletion age', 'eugDepletionAge', 'age', 'higher'],
-            ['AI pot depletion age', 'annDepletionAge', 'age', 'higher'],
-            ['EI pot at age 85', 'eugPotAt85', 'money', 'higher'],
-            ['AI pot at age 85', 'annPotAt85', 'money', 'higher'],
-            ['EI minimum pot (during drawdown)', 'eugMinPot', 'money', 'higher'],
-            ['AI minimum pot (during drawdown)', 'annMinPot', 'money', 'higher'],
-        ]},
-        { label: '📈 Income & Excess', rows: [
-            ['Cumulative excess (end of projection)', 'cumExcessEnd', 'money', 'higher'],
-            ['Cumulative excess at EI age 75', 'cumExcessAt75', 'money', 'higher'],
-            ['Net family income, first drawdown year', 'firstDrawdownNet', 'money', 'higher'],
-            ['Years income below target (pot-limited)', 'limitedYears', 'int', 'lower'],
-        ]},
-    ];
-
-    function fmtMetric(v, fmt) {
-        if (v === null || v === undefined) return '—';
-        if (fmt === 'money') return '£' + Math.round(v).toLocaleString('en-GB');
-        if (fmt === 'pct') return (v * 100).toFixed(1) + '%';
-        return String(Math.round(v));
+    // Per-year rows for a comparison column. Snapshots saved before the yearly
+    // series existed are reconstructed by differencing the cumulative series.
+    function getYearly(col) {
+        if (col.metrics.yearly) return col.metrics.yearly;
+        const s = col.metrics.series;
+        if (!s) return [];
+        const out = [];
+        let prevTax = 0, prevEx = 0;
+        for (let i = 0; i < s.years.length; i++) {
+            out.push({ year: s.years[i], eiAge: null, aiAge: null,
+                       tax: s.cumTax[i] - prevTax, excess: s.cumExcess[i] - prevEx });
+            prevTax = s.cumTax[i]; prevEx = s.cumExcess[i];
+        }
+        return out;
     }
 
+    // Per-year delta vs the baseline: ▲/▼ arrow, coloured by whether the move
+    // is good (excess up / tax down) or bad.
+    function yearDelta(b, c, higherIsBetter) {
+        if (b === null || b === undefined || c === null || c === undefined) return { text: '—', cls: 'delta-same' };
+        const d = c - b;
+        if (Math.abs(d) < 0.5) return { text: '±0', cls: 'delta-same' };
+        const up = d > 0;
+        const good = higherIsBetter ? up : !up;
+        return {
+            text: (up ? '▲ +£' : '▼ −£') + Math.abs(Math.round(d)).toLocaleString('en-GB'),
+            cls: good ? 'delta-better' : 'delta-worse'
+        };
+    }
+
+    // Flag line shown under each scenario's column header: lump sums taken and
+    // phased Parmenion drawdown. Falls back to the strategy fingerprint for
+    // snapshots saved before flags were captured.
     // Delta between baseline (b) and current (c): text + css class.
-    // For 'age' metrics, null means "never depletes" — the best possible outcome.
     function deltaInfo(b, c, fmt, better) {
         const good = d => (better === 'higher' ? d > 0 : d < 0);
         if (fmt === 'age') {
@@ -3118,32 +3395,73 @@
 
         renderCompareOrderBar(cols);
 
-        // Metric table: baseline column + one column per comparison scenario,
-        // each comparison cell showing the value with its delta underneath.
-        let html = `<thead><tr><th>Metric</th><th>${base.name}<br><span style="text-transform:none;font-weight:400;">(baseline)</span></th>` +
-            compareCols.map(c => `<th style="color:${c.color};">${c.name}</th>`).join('') + '</tr></thead><tbody>';
-        CMP_GROUPS.forEach(g => {
-            html += `<tr class="group-row"><td colspan="${cols.length + 1}">${g.label}</td></tr>`;
-            g.rows.forEach(([label, key, fmt, better]) => {
-                html += `<tr><td>${label}</td><td>${fmtMetric(base.metrics[key], fmt)}</td>` +
-                    compareCols.map(c => {
-                        const d = deltaInfo(base.metrics[key], c.metrics[key], fmt, better);
-                        return `<td>${fmtMetric(c.metrics[key], fmt)}<div class="cell-delta ${d.cls}">${d.text}</div></td>`;
-                    }).join('') + '</tr>';
-            });
+        // Year-by-year table: rows are Year / EI age / AI age; each scenario
+        // contributes an Excess and a Tax column. Comparison columns show the
+        // value with a ▲/▼ delta vs the baseline for that year.
+        const fmtM = v => v === null || v === undefined ? '—' : '£' + Math.round(v).toLocaleString('en-GB');
+        const baseRows = getYearly(base);
+        const cmpMaps = compareCols.map(c => {
+            const m = new Map();
+            getYearly(c).forEach(r => m.set(r.year, r));
+            return m;
         });
-        html += `<tr class="fingerprint-row"><td>Strategy</td><td>${base.fingerprint}</td>` +
-            compareCols.map(c => `<td style="text-align:left;">${c.fingerprint}</td>`).join('') + '</tr>';
+
+        let html = '<thead><tr class="cmp-vrow">' +
+            '<th rowspan="2">Year</th><th rowspan="2">EI age</th><th rowspan="2">AI age</th>' +
+            `<th colspan="2" class="cmp-vth"><div class="cmp-v" style="color:${CMP_BASELINE_COLOR};">${base.name} (baseline)</div></th>` +
+            compareCols.map(c => `<th colspan="2" class="cmp-vth"><div class="cmp-v" style="color:${c.color};">${c.name}</div></th>`).join('') +
+            '</tr><tr>' +
+            `<th class="cmp-sub">Excess</th><th class="cmp-sub">Tax</th>` +
+            compareCols.map(() => `<th class="cmp-sub">Excess</th><th class="cmp-sub">Tax</th>`).join('') +
+            '</tr></thead><tbody>';
+
+        // Flags row: lump sums taken / phased drawdown / death year per scenario
+        html += `<tr class="flags-row"><td colspan="3">Strategy · lump sums · mortality</td>` +
+            `<td colspan="2">${flagsSummary(base.flags) || base.fingerprint}</td>` +
+            compareCols.map(c => `<td colspan="2">${flagsSummary(c.flags) || c.fingerprint}</td>`).join('') + '</tr>';
+
+        let totBaseEx = 0, totBaseTax = 0;
+        const totCmp = compareCols.map(() => ({ ex: 0, tax: 0 }));
+        baseRows.forEach(b => {
+            const baseExNull = b.excess === null || b.excess === undefined;
+            if (!baseExNull) totBaseEx += b.excess;
+            totBaseTax += b.tax || 0;
+            html += `<tr><td>${b.year}</td><td>${b.eiAge ?? '—'}</td><td>${b.aiAge ?? '—'}</td>` +
+                `<td>${fmtM(b.excess)}</td><td>${fmtM(b.tax)}</td>`;
+            compareCols.forEach((c, i) => {
+                const r = cmpMaps[i].get(b.year);
+                if (!r) { html += '<td>—</td><td>—</td>'; return; }
+                // Where the baseline has no excess (pre-drawdown), the excess
+                // columns are not meaningful — show a dash for everyone.
+                const showEx = !baseExNull && r.excess !== null && r.excess !== undefined;
+                if (showEx) { totCmp[i].ex += r.excess; }
+                totCmp[i].tax += r.tax || 0;
+                const dEx = yearDelta(b.excess, showEx ? r.excess : null, true);
+                const dTax = yearDelta(b.tax, r.tax, false);
+                html += `<td>${showEx ? fmtM(r.excess) : '—'}<div class="cell-delta ${dEx.cls}">${dEx.text}</div></td>` +
+                        `<td>${fmtM(r.tax)}<div class="cell-delta ${dTax.cls}">${dTax.text}</div></td>`;
+            });
+            html += '</tr>';
+        });
+
+        // Totals row with overall deltas vs the baseline
+        html += `<tr class="total-row"><td colspan="3">Total (all years)</td>` +
+            `<td>${fmtM(totBaseEx)}</td><td>${fmtM(totBaseTax)}</td>` +
+            compareCols.map((c, i) => {
+                const dEx = yearDelta(totBaseEx, totCmp[i].ex, true);
+                const dTax = yearDelta(totBaseTax, totCmp[i].tax, false);
+                return `<td>${fmtM(totCmp[i].ex)}<div class="cell-delta ${dEx.cls}">${dEx.text}</div></td>` +
+                       `<td>${fmtM(totCmp[i].tax)}<div class="cell-delta ${dTax.cls}">${dTax.text}</div></td>`;
+            }).join('') + '</tr>';
         html += '</tbody>';
         document.getElementById('comparisonTable').innerHTML = html;
 
-        // One verdict chip per comparison column
+        // One verdict chip per comparison column, based on lifetime totals
         const money = v => '£' + Math.abs(Math.round(v)).toLocaleString('en-GB');
         document.getElementById('comparisonVerdicts').innerHTML = compareCols.map(c => {
-            let score = 0;
-            CMP_GROUPS.forEach(g => g.rows.forEach(([, key, fmt, better]) => {
-                score += deltaInfo(base.metrics[key], c.metrics[key], fmt, better).score;
-            }));
+            const taxScore = deltaInfo(base.metrics.totalTax, c.metrics.totalTax, 'money', 'lower').score;
+            const exScore = deltaInfo(base.metrics.cumExcessEnd, c.metrics.cumExcessEnd, 'money', 'higher').score;
+            const score = taxScore + exScore;
             const taxD = c.metrics.totalTax - base.metrics.totalTax;
             const exD = c.metrics.cumExcessEnd - base.metrics.cumExcessEnd;
             const cls = score > 0 ? 'better' : score < 0 ? 'worse' : 'mixed';
@@ -3208,15 +3526,33 @@
         const { results: data } = calculate();
         const cols = getComparisonColumns(data);
         const compareCols = cols.slice(1);
-        const rows = [['Metric', `Baseline: ${base.name}`, ...compareCols.map(c => c.name)]];
-        CMP_GROUPS.forEach(g => {
-            rows.push([g.label, ...cols.map(() => '')]);
-            g.rows.forEach(([label, key, fmt, better]) => {
-                rows.push([label, fmtMetric(base.metrics[key], fmt),
-                    ...compareCols.map(c => `${fmtMetric(c.metrics[key], fmt)} (${deltaInfo(base.metrics[key], c.metrics[key], fmt, better).text})`)]);
-            });
+        const stripTags = s => String(s || '').replace(/<[^>]*>/g, ' ');
+        const baseRows = getYearly(base);
+        const cmpMaps = compareCols.map(c => {
+            const m = new Map();
+            getYearly(c).forEach(r => m.set(r.year, r));
+            return m;
         });
-        rows.push(['Strategy', base.fingerprint, ...compareCols.map(c => c.fingerprint)]);
+        const fmtM = v => v === null || v === undefined ? '—' : '£' + Math.round(v).toLocaleString('en-GB');
+        const rows = [
+            ['Scenario', `Baseline: ${base.name}`, ...compareCols.map(c => c.name)],
+            ['Lump sums / strategy', stripTags(flagsSummary(base.flags) || base.fingerprint),
+                ...compareCols.map(c => stripTags(flagsSummary(c.flags) || c.fingerprint))],
+            [],
+            ['Year', 'EI age', 'AI age',
+                ...cols.flatMap(c => [`${c.name} — Excess`, `${c.name} — Tax`])]
+        ];
+        baseRows.forEach(b => {
+            const row = [b.year, b.eiAge ?? '—', b.aiAge ?? '—', fmtM(b.excess), fmtM(b.tax)];
+            compareCols.forEach((c, i) => {
+                const r = cmpMaps[i].get(b.year);
+                if (!r) { row.push('—', '—'); return; }
+                const dEx = yearDelta(b.excess, r.excess, true).text;
+                const dTax = yearDelta(b.tax, r.tax, false).text;
+                row.push(`${fmtM(r.excess)} (${dEx})`, `${fmtM(r.tax)} (${dTax})`);
+            });
+            rows.push(row);
+        });
         const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\r\n');
         const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
         const a = document.createElement('a');
@@ -3237,13 +3573,25 @@
         const cols = getComparisonColumns(data);
         const compareCols = cols.slice(1);
         const cell = 'padding:2px 6px;border-bottom:1px solid #ccc;font-size:8pt;text-align:right;';
+        const stripTags = s => String(s || '').replace(/<[^>]*>/g, ' ');
+        const fmtM = v => v === null || v === undefined ? '—' : '£' + Math.round(v).toLocaleString('en-GB');
+        const baseRows = getYearly(base);
+        const cmpMaps = compareCols.map(c => {
+            const m = new Map();
+            getYearly(c).forEach(r => m.set(r.year, r));
+            return m;
+        });
         let rows = '';
-        CMP_GROUPS.forEach(g => {
-            rows += `<tr><td colspan="${cols.length + 1}" style="padding:5px 6px 2px;font-size:8pt;font-weight:bold;background:#eee;">${g.label}</td></tr>`;
-            g.rows.forEach(([label, key, fmt, better]) => {
-                rows += `<tr><td style="${cell}text-align:left;">${label}</td><td style="${cell}">${fmtMetric(base.metrics[key], fmt)}</td>` +
-                    compareCols.map(c => `<td style="${cell}">${fmtMetric(c.metrics[key], fmt)} <strong>(${deltaInfo(base.metrics[key], c.metrics[key], fmt, better).text})</strong></td>`).join('') + '</tr>';
-            });
+        baseRows.forEach(b => {
+            rows += `<tr><td style="${cell}text-align:left;">${b.year}</td>` +
+                `<td style="${cell}">${b.eiAge ?? '—'}</td><td style="${cell}">${b.aiAge ?? '—'}</td>` +
+                `<td style="${cell}">${fmtM(b.excess)}</td><td style="${cell}">${fmtM(b.tax)}</td>` +
+                compareCols.map((c, i) => {
+                    const r = cmpMaps[i].get(b.year);
+                    if (!r) return `<td style="${cell}">—</td><td style="${cell}">—</td>`;
+                    return `<td style="${cell}">${fmtM(r.excess)} <strong>(${yearDelta(b.excess, r.excess, true).text})</strong></td>` +
+                           `<td style="${cell}">${fmtM(r.tax)} <strong>(${yearDelta(b.tax, r.tax, false).text})</strong></td>`;
+                }).join('') + '</tr>';
         });
         const taxImg = cmpTaxChart ? cmpTaxChart.toBase64Image('image/png', 1) : '';
         const excessImg = cmpExcessChart ? cmpExcessChart.toBase64Image('image/png', 1) : '';
@@ -3255,15 +3603,23 @@
                     <div style="font-size:8pt;color:#333;">Baseline: ${base.name} &nbsp;vs&nbsp; ${compareCols.map(c => c.name).join(', ') || '—'}</div>
                 </div>
                 <table style="width:100%;border-collapse:collapse;margin-bottom:10px;">
-                    <thead><tr>
-                        <th style="${cell}text-align:left;background:#ddd;">Metric</th>
-                        <th style="${cell}background:#ddd;">${base.name}</th>
-                        ${compareCols.map(c => `<th style="${cell}background:#ddd;">${c.name}</th>`).join('')}
-                    </tr></thead>
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="${cell}text-align:left;background:#ddd;">Year</th>
+                            <th rowspan="2" style="${cell}background:#ddd;">EI age</th>
+                            <th rowspan="2" style="${cell}background:#ddd;">AI age</th>
+                            <th colspan="2" style="${cell}background:#ddd;">${base.name} (baseline)</th>
+                            ${compareCols.map(c => `<th colspan="2" style="${cell}background:#ddd;">${c.name}</th>`).join('')}
+                        </tr>
+                        <tr>
+                            <th style="${cell}background:#eee;">Excess</th><th style="${cell}background:#eee;">Tax</th>
+                            ${compareCols.map(() => `<th style="${cell}background:#eee;">Excess</th><th style="${cell}background:#eee;">Tax</th>`).join('')}
+                        </tr>
+                    </thead>
                     <tbody>${rows}</tbody>
                 </table>
                 <div style="font-size:7pt;color:#333;margin-bottom:8px;">
-                    ${cols.map(c => `<strong>${c.name}:</strong> ${c.fingerprint}`).join('<br>')}
+                    ${cols.map(c => `<strong>${c.name}:</strong> ${stripTags(flagsSummary(c.flags) || c.fingerprint)} · ${c.fingerprint}`).join('<br>')}
                 </div>
                 ${taxImg ? `<div style="margin-bottom:8px;"><img src="${taxImg}" style="width:100%;max-height:270px;object-fit:contain;"></div>` : ''}
                 ${excessImg ? `<div style="margin-bottom:8px;"><img src="${excessImg}" style="width:100%;max-height:270px;object-fit:contain;"></div>` : ''}

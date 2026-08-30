@@ -28,10 +28,25 @@ static app — HTML, CSS and JavaScript with Chart.js. No build step.
   automatic re-calculation when strategy or lump-sum settings change
 - Manual per-year income overrides by clicking Target cells
 - **Scenario snapshots & comparison**: snapshot any result set (stored in the
-  browser), pick a baseline, and compare it against the live scenario — key
-  metric delta table (tax, depletion ages, pots at 85, excess, TFC), overlaid
-  cumulative tax/excess and pot-balance charts, CSV export, and an extra
-  comparison page in the Print/PDF summary
+  browser), pick a baseline, and compare other snapshots and/or the live
+  scenario against it in a **year-by-year table** (Year / EI age / AI age ×
+  per-year family excess income and total tax, with ▲/▼ deltas vs the
+  baseline, a totals row, and vertical scenario headers). A flags row notes
+  each scenario's lump sums, phased Parmenion drawdown and mortality years.
+  Overlaid cumulative tax/excess and pot-balance charts, CSV export, and an
+  extra comparison page in the Print/PDF summary.
+- **Collapsible sections**: charts, Key Outcomes, the Year-by-Year table and
+  Scenario Comparison all toggle open/closed from their titles (state
+  persists in the browser).
+- **Mortality planning**: optionally model either person dying in a chosen
+  year. Their pensions and drawdown stop; the survivor receives the
+  survivor's benefits (AI: 50% of EI's Avon & Civil Service pensions; EI:
+  £2,000/yr plus a one-off £80,000 tax-free payment), family living costs
+  reduce by a configurable percentage (single vs couple), and the survivor
+  inherits the Parmenion pot — withdrawals from the inherited pot are
+  tax-free if death was before age 75, otherwise taxed as the survivor's
+  income (per pension death-benefit rules). Death years are marked † in the
+  projection table.
 - Scenario save/load (JSON), reset to defaults, print/PDF summary
 
 ## Running
