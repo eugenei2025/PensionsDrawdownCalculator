@@ -361,6 +361,11 @@
         .comparison-card h2 { cursor: pointer; user-select: none; display: flex; align-items: center; gap: 8px; }
         .comparison-card.collapsed h2 { margin-bottom: 0; }
         .comparison-card.collapsed > *:not(h2) { display: none !important; }
+
+        /* Mortality Sensitivity card collapse (same pattern as comparison card) */
+        #mortalitySensitivityCard h2 { cursor: pointer; user-select: none; display: flex; align-items: center; gap: 8px; }
+        #mortalitySensitivityCard.collapsed h2 { margin-bottom: 0; }
+        #mortalitySensitivityCard.collapsed > *:not(h2) { display: none !important; }
         .comparison-table.yearly th { white-space: nowrap; vertical-align: bottom; }
         .comparison-table.yearly td { white-space: nowrap; }
         .comparison-table.yearly tr.total-row td { font-weight: 700; border-top: 2px solid var(--primary); background: #f7fafc; }
@@ -497,6 +502,23 @@
             
             .print-summary * { color: #000 !important; }
         }
+
+        /* Mortality sensitivity scenario blocks */
+        .mort-scenario { border-top: 1px solid var(--border); padding-top: 14px; margin-top: 14px; }
+        .mort-scenario h3 { font-size: 1rem; color: var(--primary); margin: 0 0 6px; }
+        .mort-note { font-size: 0.78rem; color: var(--text-muted); margin: 0 0 10px; line-height: 1.55; }
+        .mort-verdict { font-size: 0.85rem; line-height: 1.65; padding: 8px 10px; background: #f8fafc; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 12px; }
+        .mort-chart-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+        .mort-chart-box { position: relative; height: 240px; }
+        .mort-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+        .mort-stat { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; background: #f8fafc; }
+        .mort-stat .ms-label { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 3px; }
+        .mort-stat .ms-value { font-size: 1.05rem; font-weight: 700; }
+        .mort-stat .ms-sub { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+        .ms-good { color: #276749; } .ms-bad { color: #c53030; } .ms-warn { color: #c05621; }
+        @media (max-width: 700px) { .mort-stats { grid-template-columns: 1fr; } }
+        @media (max-width: 1100px) { .mort-chart-grid { grid-template-columns: 1fr; } }
+        @media print { #mortalitySensitivityCard { display: none; } }
     </style>
 </head>
 <body>
@@ -749,9 +771,11 @@
                     </div>
                     <div class="input-row">
                         <div class="input-group"><label>Year of Death <span class="year-hint">(applies from start of year)</span></label><input type="number" id="eugeneDeathYear" value="2045" step="1" min="2025" max="2063"></div>
+                        <div class="input-group"><label>Age at Death <span class="year-hint">(auto-fills year)</span></label><input type="number" id="eugeneDeathAge" value="81" step="1" min="61" max="99"></div>
                         <div class="input-group"><label>Living Cost Reduction (%) <span class="year-hint">(single vs couple)</span></label><input type="number" id="eugeneDeathLivingReduction" value="25" step="5" min="0" max="100"></div>
                     </div>
-                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">From that year EI's State, Avon &amp; Civil Service pensions and his Parmenion drawdown stop. AI then receives <strong>50% of the Avon &amp; Civil Service pensions</strong> (taxable, still growing at their rates) and his Parmenion pot passes to her — withdrawals are <strong>tax-free if death is before age 75</strong>, otherwise taxed as her income. AI's own drawdown target then draws on the inherited pot once her own is exhausted. Family living costs reduce by the stated percentage from the year of death (one person instead of two).</p>
+                    <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">Enter either the year or EI's age at death — the other is calculated from his date of birth.</p>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">From that year EI's State, Avon &amp; Civil Service pensions and his Parmenion drawdown stop. AI then receives <strong>50% of the Avon pension and 3/8 (37.5%) of the Civil Service pension</strong> (taxable, still growing at their rates) and his Parmenion pot passes to her — withdrawals are <strong>tax-free if death is before age 75</strong>, otherwise taxed as her income. AI's own drawdown target then draws on the inherited pot once her own is exhausted. Family living costs reduce by the stated percentage from the year of death (one person instead of two), and AI's drawdown rises if needed so her net income meets those reduced living costs <strong>plus AI's comfort margin</strong> (set in her Mortality Sensitivity area below, default 20%, never entering the 40% tax band, and falling back to costs-only if the pot cannot sustain the extra to age 90).</p>
                 </div>
             </div>
 
@@ -841,9 +865,11 @@
                     </div>
                     <div class="input-row">
                         <div class="input-group"><label>Year of Death <span class="year-hint">(applies from start of year)</span></label><input type="number" id="annabelleDeathYear" value="2050" step="1" min="2025" max="2063"></div>
+                        <div class="input-group"><label>Age at Death <span class="year-hint">(auto-fills year)</span></label><input type="number" id="annabelleDeathAge" value="78" step="1" min="53" max="91"></div>
                         <div class="input-group"><label>Living Cost Reduction (%) <span class="year-hint">(single vs couple)</span></label><input type="number" id="annabelleDeathLivingReduction" value="25" step="5" min="0" max="100"></div>
                     </div>
-                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">From that year AI's State &amp; Teachers pensions and her Parmenion drawdown stop. EI then receives a <strong>£2,000/yr survivor pension</strong> (taxable, grown at the Teachers rate) plus a <strong>one-off £80,000 tax-free payment</strong> in that year, and her Parmenion pot passes to him — withdrawals are <strong>tax-free if death is before age 75</strong>, otherwise taxed as his income. EI's own drawdown target then draws on the inherited pot once his own is exhausted. Family living costs reduce by the stated percentage from the year of death (one person instead of two).</p>
+                    <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">Enter either the year or AI's age at death — the other is calculated from her date of birth.</p>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">From that year AI's State &amp; Teachers pensions and her Parmenion drawdown stop. EI then receives a <strong>£2,000/yr survivor pension</strong> (taxable, grown at the Teachers rate, shown in his Mort column and netted off before his drawdown is calculated) plus a <strong>one-off £13,000 payment</strong> that moves straight into his Parmenion pot in that year, and her remaining Parmenion pot passes to him — withdrawals are <strong>tax-free if death is before age 75</strong>, otherwise taxed as his income. EI's own drawdown target then draws on the inherited pot once his own is exhausted. Family living costs reduce by the stated percentage from the year of death (one person instead of two), and EI's drawdown rises if needed so his net income meets those reduced living costs <strong>plus EI's comfort margin</strong> (set in his Mortality Sensitivity area below, default 20%, never entering the 40% tax band, and falling back to costs-only if the pot cannot sustain the extra to age 90).</p>
                 </div>
             </div>
         </div>
@@ -884,6 +910,26 @@
 
         <div id="alertsSection" class="alerts-section" style="display: none;"></div>
 
+        <div class="table-container" id="projectionsTable">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <h2 style="margin: 0;">Year-by-Year Projections</h2>
+                    <p class="collapse-on-toggle" style="font-size: 0.85rem; color: var(--text-muted); margin: 4px 0 0 0;">
+                        💡 Click <strong>EI Target</strong> or <strong>AI Target</strong> cells to manually adjust income.<br>
+                        🔒 Cells locked when pot is depleted. Living costs only apply once drawdown begins.<br>
+                        💷 <strong>TFC</strong> = tax-free cash used from the remaining 25% entitlement within each phased Parmenion (DC) withdrawal. Phased withdrawals first fill any unused personal allowance (0% tax), then draw TFC — so the entitlement lasts as long as possible. DB pensions are always fully taxable.<br>
+                        † = death year of that person (mortality planning); the survivor pension income is shown in the survivor's <strong>Mort</strong> column (not DB), is netted off — together with State and DB — before the drawdown requirement is calculated, any one-off survivor payment appears in their <strong>Net</strong>, and living costs reduce by the mortality-section percentage from the death year.<br>
+                        🪦 <strong>Mort</strong> = money received that year from the deceased partner: the annual survivor pension (AI: 50% of EI's Avon pension plus 3/8 of his Civil Service pension; EI: £2,000/yr), plus in the death year the deceased's remaining Parmenion pot transferred into the survivor's own pot (for EI this includes the one-off £13,000 payment) — hover for the breakdown. This money, like the survivor's own State/DB pensions, goes towards the reduced living costs as a minimum: from the death year the survivor's drawdown rises if needed so their net income covers them.
+                    </p>
+                    <div id="optionsStatus" class="collapse-on-toggle" style="font-size: 0.85rem; color: var(--text); margin-top: 8px; padding: 8px 10px; background: #f8fafc; border: 1px solid var(--border); border-radius: 6px; line-height: 1.6;"></div>
+                </div>
+                <button class="clear-all-overrides collapse-on-toggle" id="clearAllOverrides" style="display: none;">Clear All Adjustments</button>
+            </div>
+            <div class="table-scroll">
+                <table id="dataTable" class="data-table"><thead></thead><tbody></tbody></table>
+            </div>
+        </div>
+
         <h2 class="section-title" id="keyOutcomesTitle">Key Outcomes</h2>
         <div class="summary-grid" id="summaryCards"></div>
 
@@ -910,31 +956,75 @@
         
         <div class="chart-container">
             <h2>Family Gross Income by Source</h2>
-            <p style="font-size:0.75rem;color:var(--text-muted);margin:-10px 0 12px 0;">One stacked bar per year — family gross income split across EI's Parmenion drawdown, State, Avon &amp; Civil Service pensions and AI's Parmenion drawdown, State &amp; Teachers pensions. Living costs shown as a dashed line. Year, EI age and AI age along the bottom.</p>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin:-10px 0 12px 0;">One stacked bar per year — family gross income split across EI's Parmenion drawdown, State, Avon &amp; Civil Service pensions and AI's Parmenion drawdown, State &amp; Teachers pensions, plus any survivor (Mort) pensions after a death. Living costs shown as a dashed line. Year, EI age and AI age along the bottom.</p>
             <div id="drawdownMixChartWrapper" style="position: relative; height: 380px;">
                 <canvas id="drawdownMixChart"></canvas>
             </div>
         </div>
         
-        <div class="table-container" id="projectionsTable">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
-                <div>
-                    <h2 style="margin: 0;">Year-by-Year Projections</h2>
-                    <p class="collapse-on-toggle" style="font-size: 0.85rem; color: var(--text-muted); margin: 4px 0 0 0;">
-                        💡 Click <strong>EI Target</strong> or <strong>AI Target</strong> cells to manually adjust income.<br>
-                        🔒 Cells locked when pot is depleted. Living costs only apply once drawdown begins.<br>
-                        💷 <strong>TFC</strong> = tax-free cash used from the remaining 25% entitlement within each phased Parmenion (DC) withdrawal. Phased withdrawals first fill any unused personal allowance (0% tax), then draw TFC — so the entitlement lasts as long as possible. DB pensions are always fully taxable.<br>
-                        † = death year of that person (mortality planning); survivor pensions are included in the survivor's <strong>DB</strong> column, any one-off survivor payment in their <strong>Net</strong>, and living costs reduce by the mortality-section percentage from the death year.
-                    </p>
-                    <div id="optionsStatus" class="collapse-on-toggle" style="font-size: 0.85rem; color: var(--text); margin-top: 8px; padding: 8px 10px; background: #f8fafc; border: 1px solid var(--border); border-radius: 6px; line-height: 1.6;"></div>
-                </div>
-                <button class="clear-all-overrides collapse-on-toggle" id="clearAllOverrides" style="display: none;">Clear All Adjustments</button>
+        <div class="card" id="mortalitySensitivityCard">
+            <h2>Mortality Sensitivity</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px;">
+                🪦 <strong>If one of them dies, can the survivor still pay the bills — and how much is left over?</strong>
+                For every possible year of death (2028–2063, from the year EI takes his pension) the full projection is rerun with the survivor pension,
+                the inherited pot and the reduced living costs applied. Each scenario below answers in one glance:
+                three headline numbers, then one chart — <strong>one bar per year of death: the survivor's net income
+                in a typical year, against the reduced living costs shown as a dashed line</strong>. A bar rising
+                <strong>above the line is a surplus</strong>; one falling <strong>below it is a deficit</strong>.
+                <span style="color:#276749; font-weight:600;">Green = living costs plus the full comfort margin funded every year.</span>
+                <span style="color:#c05621; font-weight:600;">Amber = bills covered, but the full comfort margin isn't reached in some years (pot pressure or the 20%-band cap).</span>
+                <span style="color:#c53030; font-weight:600;">Red = at least one year where the pots cannot cover the bills.</span>
+                Hover a bar for the exact surplus and the tightest-year figure. One death is modelled at a time —
+                for a specific combination of both deaths, set them in the Mortality Planning sections above and read the
+                Year-by-Year table.
+            </p>
+            <div id="mortSensStale" style="display:none; font-size:0.85rem; margin-bottom:12px; padding:8px 10px; background:#fffbeb; border:1px solid #f6e05e; border-radius:6px;">
+                ⚠️ Parameters have changed since this analysis ran. <button class="toolbar-btn" id="mortSensRerun">🔄 Re-run analysis</button>
             </div>
-            <div class="table-scroll">
-                <table id="dataTable" class="data-table"><thead></thead><tbody></tbody></table>
+
+            <div class="mort-scenario">
+                <h3>If EI dies — the impact on AI</h3>
+                <p class="mort-note">AI receives <strong>50% of EI's Avon pension and 3/8 (37.5%) of his Civil Service pension</strong> every year from his death (shown in her <strong>Mort</strong> column), and his remaining Parmenion pot transfers into hers — withdrawals tax-free if he dies before 75, taxed as her income at 75+. Family living costs reduce by the mortality-section percentage, and AI's drawdown rises if needed so her net income covers the reduced costs plus her comfort margin.</p>
+                <div style="display:flex; align-items:flex-end; gap:14px; flex-wrap:wrap; margin-bottom:12px; padding:10px 12px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px;">
+                    <div class="input-group" style="margin:0;"><label>AI's comfort margin (%)</label><input type="number" id="annabelleSurvivorMargin" value="20" step="5" min="0" max="100" style="width:90px;"></div>
+                    <p style="font-size:0.78rem; color:var(--text-muted); margin:0; flex:1; min-width:280px; line-height:1.55;">
+                        <strong>What this means:</strong> as the survivor, AI draws each year the
+                        <strong>reduced living costs plus this margin</strong> (e.g. 20% extra for comfort, gifts and
+                        one-off spending) — never drawing so much that her income enters the <strong>40% tax band</strong>.
+                        If her pots could not keep paying the extra every year until age 90, the model prudently falls back
+                        to the living costs only — so money above the bills is actually being spent, not silently left to
+                        accumulate, and the remaining-pot figures stay realistic.
+                    </p>
+                </div>
+                <div id="mortSensSummaryEI" class="mort-verdict">Running analysis…</div>
+                <div id="mortEIStats" class="mort-stats"></div>
+                <div class="mort-chart-grid">
+                    <div class="mort-chart-box"><canvas id="mortEIExcessChart"></canvas></div>
+                </div>
+            </div>
+
+            <div class="mort-scenario">
+                <h3>If AI dies — the impact on EI</h3>
+                <p class="mort-note">EI receives a <strong>£2,000/yr survivor pension</strong> (grown at the Teachers rate, shown in his <strong>Mort</strong> column), a <strong>one-off £13,000 payment</strong> into his Parmenion pot, and AI's remaining pot transfers into his — withdrawals tax-free if she dies before 75, taxed as his income at 75+. Family living costs reduce by the mortality-section percentage, and EI's drawdown rises if needed so his net income covers the reduced costs plus his comfort margin.</p>
+                <div style="display:flex; align-items:flex-end; gap:14px; flex-wrap:wrap; margin-bottom:12px; padding:10px 12px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px;">
+                    <div class="input-group" style="margin:0;"><label>EI's comfort margin (%)</label><input type="number" id="eugeneSurvivorMargin" value="20" step="5" min="0" max="100" style="width:90px;"></div>
+                    <p style="font-size:0.78rem; color:var(--text-muted); margin:0; flex:1; min-width:280px; line-height:1.55;">
+                        <strong>What this means:</strong> as the survivor, EI draws each year the
+                        <strong>reduced living costs plus this margin</strong> (e.g. 20% extra for comfort, gifts and
+                        one-off spending) — never drawing so much that his income enters the <strong>40% tax band</strong>.
+                        If his pots could not keep paying the extra every year until age 90, the model prudently falls back
+                        to the living costs only — so money above the bills is actually being spent, not silently left to
+                        accumulate, and the remaining-pot figures stay realistic.
+                    </p>
+                </div>
+                <div id="mortSensSummaryAI" class="mort-verdict">Running analysis…</div>
+                <div id="mortAIStats" class="mort-stats"></div>
+                <div class="mort-chart-grid">
+                    <div class="mort-chart-box"><canvas id="mortAIExcessChart"></canvas></div>
+                </div>
             </div>
         </div>
-
+        
         <div class="card comparison-card" id="comparisonCard">
             <h2>Scenario Comparison</h2>
             <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
@@ -1010,14 +1100,17 @@
     const PCLS_RATE = 0.25;
 
     // Survivor benefits (per the pension death-benefit rules):
-    // - If EI dies, AI receives 50% of his Avon & Civil Service (DB) pensions.
-    // - If AI dies, EI receives a £2,000/yr survivor pension plus a one-off
-    //   £80,000 tax-free payment.
+    // - If EI dies, AI receives 50% of his Avon pension and 3/8 (37.5%) of his
+    //   Civil Service pension (both taxable, still growing at their rates).
+    // - If AI dies, EI receives a £2,000/yr survivor pension (taxable, grown at
+    //   the Teachers rate) plus a one-off £13,000 payment that moves straight
+    //   into his Parmenion pot alongside her remaining pot.
     // - DC (Parmenion) pots pass to the survivor: withdrawals are tax-free if
     //   death occurs before age 75, otherwise taxed as the survivor's income.
-    const SURVIVOR_DB_SHARE = 0.5;
+    const SURVIVOR_AVON_SHARE = 0.5;
+    const SURVIVOR_CIVIL_SHARE = 3 / 8;
     const EI_SURVIVOR_PENSION = 2000;
-    const EI_SURVIVOR_LUMP = 80000;
+    const EI_SURVIVOR_LUMP = 13000;
 
     function getDefaultState() {
         return {
@@ -1059,6 +1152,11 @@
         annabelleOptimisation: null,
         eugeneDeathEnabled: false, eugeneDeathYear: 2045, eugeneDeathLivingReduction: 25,
         annabelleDeathEnabled: false, annabelleDeathYear: 2050, annabelleDeathLivingReduction: 25,
+        // Survivor comfort margins (%): after the partner's death, the named
+        // survivor draws living costs plus this margin each year — capped at
+        // the top of the 20% tax band, and dropped back to costs-only if the
+        // pot cannot sustain the extra every year until age 90.
+        eugeneSurvivorMargin: 20, annabelleSurvivorMargin: 20,
         scenarioName: null
         };
     }
@@ -1217,18 +1315,19 @@
                 annInheritedTaxFree = eugAge < 75;
                 annTransferYear = year;
                 eugenePot = 0;
-                annSurvAvon = eugAvonVal * SURVIVOR_DB_SHARE;
-                annSurvCivil = eugCivilVal * SURVIVOR_DB_SHARE;
+                annSurvAvon = eugAvonVal * SURVIVOR_AVON_SHARE;
+                annSurvCivil = eugCivilVal * SURVIVOR_CIVIL_SHARE;
             }
             if (annDeathYear === year) {
-                eugInheritedPot = annabellePot;
+                // AI's remaining pot plus the one-off £13,000 payment both move
+                // into EI's Parmenion pot (tracked as the inherited pot, shown
+                // merged in the Pot column); the £2,000/yr survivor pension begins.
+                eugInheritedPot = annabellePot + EI_SURVIVOR_LUMP;
                 eugInheritedTaxFree = annAge < 75;
                 eugTransferYear = year;
                 annabellePot = 0;
                 eugSurvPension = EI_SURVIVOR_PENSION;
             }
-            // One-off tax-free payment to EI in AI's death year only
-            const eugSurvLumpYr = (annDeathYear === year && !eugDead) ? EI_SURVIVOR_LUMP : 0;
             // Survivor DB income this year (only while the survivor is alive)
             const eugSurv = (annDead && !eugDead) ? eugSurvPension : 0;
             const annSurv = (eugDead && !annDead) ? (annSurvAvon + annSurvCivil) : 0;
@@ -1237,6 +1336,16 @@
             // both have died there is no household income or living cost.
             const bothDead = eugDead && annDead;
             const anyoneDrawingDown = !bothDead && (eugPhase === 'drawdown' || annPhase === 'drawdown');
+
+            // Living costs only apply once someone is drawing down. After a
+            // death, the survivor's household costs drop by the reduction set
+            // in that person's mortality section (single vs couple).
+            let livingReduction = 0;
+            if (eugDead && !annDead) livingReduction = (state.eugeneDeathLivingReduction || 0) / 100;
+            else if (annDead && !eugDead) livingReduction = (state.annabelleDeathLivingReduction || 0) / 100;
+            livingReduction = Math.min(1, Math.max(0, livingReduction));
+            const livingBase = state.livingCostsInflation ? state.annualLivingCosts * cumInfl : state.annualLivingCosts;
+            const living = anyoneDrawingDown ? livingBase * (1 - livingReduction) : 0;
 
             // ========== EUGENE ==========
             let eugBase = state.eugeneTargetIncome, eugHasOvr = false;
@@ -1261,6 +1370,64 @@
             const eugAvon = (!eugDead && year >= state.eugeneAvonYear) ? eugAvonVal : 0;
             const eugCivil = (!eugDead && year >= state.eugeneCivilYear) ? eugCivilVal : 0;
             const eugDB = eugState + eugAvon + eugCivil + eugSurv;
+
+            // Survivor minimum: after AI's death, EI's target rises (if needed)
+            // so his NET income meets the reduced living cost PLUS the comfort
+            // margin (eugeneSurvivorMargin %) — but never so far that his
+            // gross enters the 40% band, and only while the pots could keep
+            // paying the extra every year until he turns 90 (otherwise the
+            // model prudently falls back to costs-only). Solved by bisection
+            // on a faithful simulation of this year's draw: own pot (grown
+            // this year) first — taxable, minus any phased TFC — then the
+            // inherited pot (tax-free if AI died before 75). The £2,000 Mort
+            // pension is inside eugDB, so it is netted off before the
+            // required drawdown is calculated.
+            let eugNeed = null, eugComfortFull = false, eugComfort = null;
+            if (annDead && !eugDead && eugPhase === 'drawdown' && living > 0) {
+                const ownGrown = state.dcGrowthEnabled ? eugenePot * (1 + state.dcGrowthRate) : eugenePot;
+                const inhGrown = (state.dcGrowthEnabled && eugTransferYear !== null && year > eugTransferYear) ? eugInheritedPot * (1 + state.dcGrowthRate) : eugInheritedPot;
+                const eugInitTotal = state.eugenePot1Balance + state.eugenePot2Balance;
+                const eugPot2Ratio = eugInitTotal > 0 ? state.eugenePot2Balance / eugInitTotal : 0;
+                const tfcRem = eugTFCRemaining === null ? (eugPhased ? PCLS_RATE * eugenePot * eugPot2Ratio : 0) : eugTFCRemaining;
+                const sim = (T) => {
+                    const gap = Math.max(0, T - eugDB);
+                    const drawOwn = Math.min(gap, Math.max(0, ownGrown));
+                    let tfc = 0;
+                    if (eugPhased && drawOwn > 0 && tfcRem > 0) {
+                        const pa = getTaxThresholds(year).personalAllowance;
+                        const desired = Math.max(0, drawOwn - Math.max(0, pa - eugDB));
+                        tfc = Math.min(tfcRem, desired, drawOwn, PCLS_RATE * ownGrown);
+                    }
+                    const drawInh = Math.min(gap - drawOwn, Math.max(0, inhGrown));
+                    const gross = eugDB + (drawOwn - tfc) + (eugInheritedTaxFree ? 0 : drawInh);
+                    return { net: eugDB + drawOwn + drawInh - calculateTax(gross, year), gross };
+                };
+                const margin = Math.max(0, (state.eugeneSurvivorMargin || 0) / 100);
+                const extraNet = living * margin;
+                const yearsTo90 = Math.max(0, 90 - eugAge);
+                eugComfortFull = extraNet <= 0
+                    || (Math.max(0, ownGrown) + Math.max(0, inhGrown)) >= extraNet * yearsTo90;
+                const need = living * (1 + (eugComfortFull ? margin : 0));
+                eugNeed = need;
+                if (sim(eugTarget).net < need - 0.5) {
+                    let lo = eugTarget, hi = need * 4 + 100000;
+                    for (let i = 0; i < 24; i++) {
+                        const mid = (lo + hi) / 2;
+                        if (sim(mid).net < need) lo = mid; else hi = mid;
+                    }
+                    eugTarget = Math.ceil(hi);
+                }
+                // 40% cap: never draw so far that gross crosses the top of the 20% band
+                const eugThr = getTaxThresholds(year).basicRateThreshold;
+                if (sim(eugTarget).gross > eugThr) {
+                    let lo = 0, hi = eugTarget;
+                    for (let i = 0; i < 24; i++) {
+                        const mid = (lo + hi) / 2;
+                        if (sim(mid).gross > eugThr) hi = mid; else lo = mid;
+                    }
+                    eugTarget = Math.max(eugDB, Math.floor(lo));
+                }
+            }
 
             // Accumulation phase with date-aware contributions and growth
             if (eugPhase === 'accumulation' && !eugDead) {
@@ -1355,7 +1522,13 @@
             // tax-free and stays out of gross).
             const eugGross = eugDB + (eugDraw - eugDrawInh - eugTFC) + (eugInheritedTaxFree ? 0 : eugDrawInh);
             const eugTax = calculateTax(eugGross, year);
-            const eugNet = eugDB + eugDraw - eugTax + eugSurvLumpYr;
+            const eugNet = eugDB + eugDraw - eugTax;
+            // Comfort tier: full = costs + margin funded; costs = margin dropped
+            // (prudent fallback) but bills met; short = bills not fully met.
+            if (eugNeed !== null) {
+                eugComfort = eugNet < living - 0.5 ? 'short'
+                    : (eugComfortFull && eugNet >= eugNeed - 0.5 ? 'full' : 'costs');
+            }
 
             // ========== ANNABELLE ==========
             let annBase = state.annabelleTargetIncome, annHasOvr = false;
@@ -1379,6 +1552,62 @@
             const annState = (!annDead && year >= state.annabelleStateYear) ? annStateVal : 0;
             const annTeach = (!annDead && year >= state.annabelleTeachersYear) ? annTeachVal : 0;
             const annDB = annState + annTeach + annSurv;
+
+            // Survivor minimum: after EI's death, AI's target rises (if needed)
+            // so her NET income meets the reduced living cost PLUS the comfort
+            // margin (annabelleSurvivorMargin %) — but never so far that her
+            // gross enters the 40% band, and only while the pots could keep
+            // paying the extra every year until she turns 90 (otherwise the
+            // model prudently falls back to costs-only). Solved by bisection
+            // on a faithful simulation of this year's draw: own pot (grown
+            // this year) first — taxable, minus any phased TFC — then the
+            // inherited pot (tax-free if EI died before 75). The Mort pension
+            // (50% Avon + 3/8 Civil) is inside annDB, so it is netted off
+            // before the required drawdown is calculated.
+            let annNeed = null, annComfortFull = false, annComfort = null;
+            if (eugDead && !annDead && annPhase === 'drawdown' && living > 0) {
+                const ownGrown = state.dcGrowthEnabled ? annabellePot * (1 + state.dcGrowthRate) : annabellePot;
+                const inhGrown = (state.dcGrowthEnabled && annTransferYear !== null && year > annTransferYear) ? annInheritedPot * (1 + state.dcGrowthRate) : annInheritedPot;
+                const tfcRem = annTFCRemaining === null ? (annPhased ? PCLS_RATE * annabellePot : 0) : annTFCRemaining;
+                const sim = (T) => {
+                    const gap = Math.max(0, T - annDB);
+                    const drawOwn = Math.min(gap, Math.max(0, ownGrown));
+                    let tfc = 0;
+                    if (annPhased && drawOwn > 0 && tfcRem > 0) {
+                        const pa = getTaxThresholds(year).personalAllowance;
+                        const desired = Math.max(0, drawOwn - Math.max(0, pa - annDB));
+                        tfc = Math.min(tfcRem, desired, drawOwn, PCLS_RATE * ownGrown);
+                    }
+                    const drawInh = Math.min(gap - drawOwn, Math.max(0, inhGrown));
+                    const gross = annDB + (drawOwn - tfc) + (annInheritedTaxFree ? 0 : drawInh);
+                    return { net: annDB + drawOwn + drawInh - calculateTax(gross, year), gross };
+                };
+                const margin = Math.max(0, (state.annabelleSurvivorMargin || 0) / 100);
+                const extraNet = living * margin;
+                const yearsTo90 = Math.max(0, 90 - annAge);
+                annComfortFull = extraNet <= 0
+                    || (Math.max(0, ownGrown) + Math.max(0, inhGrown)) >= extraNet * yearsTo90;
+                const need = living * (1 + (annComfortFull ? margin : 0));
+                annNeed = need;
+                if (sim(annTarget).net < need - 0.5) {
+                    let lo = annTarget, hi = need * 4 + 100000;
+                    for (let i = 0; i < 24; i++) {
+                        const mid = (lo + hi) / 2;
+                        if (sim(mid).net < need) lo = mid; else hi = mid;
+                    }
+                    annTarget = Math.ceil(hi);
+                }
+                // 40% cap: never draw so far that gross crosses the top of the 20% band
+                const annThr = getTaxThresholds(year).basicRateThreshold;
+                if (sim(annTarget).gross > annThr) {
+                    let lo = 0, hi = annTarget;
+                    for (let i = 0; i < 24; i++) {
+                        const mid = (lo + hi) / 2;
+                        if (sim(mid).gross > annThr) hi = mid; else lo = mid;
+                    }
+                    annTarget = Math.max(annDB, Math.floor(lo));
+                }
+            }
 
             if (annPhase === 'accumulation' && !annDead) {
                 if (year >= annContribStart.year && year <= state.annabelleContribStopYear) {
@@ -1458,6 +1687,11 @@
             const annGross = annDB + (annDraw - annDrawInh - annTFC) + (annInheritedTaxFree ? 0 : annDrawInh);
             const annTax = calculateTax(annGross, year);
             const annNet = annDB + annDraw - annTax;
+            // Comfort tier (see EI above): full / costs / short.
+            if (annNeed !== null) {
+                annComfort = annNet < living - 0.5 ? 'short'
+                    : (annComfortFull && annNet >= annNeed - 0.5 ? 'full' : 'costs');
+            }
 
             // Apply growth to DB pensions for NEXT year
             if (state.avonGrowthEnabled) {
@@ -1480,16 +1714,6 @@
 
             const totGross = eugGross + annGross;
             const totNet = eugNet + annNet;
-            
-            // Living costs only apply once someone is drawing down. After a
-            // death, the survivor's household costs drop by the reduction set
-            // in that person's mortality section (single vs couple).
-            let livingReduction = 0;
-            if (eugDead && !annDead) livingReduction = (state.eugeneDeathLivingReduction || 0) / 100;
-            else if (annDead && !eugDead) livingReduction = (state.annabelleDeathLivingReduction || 0) / 100;
-            livingReduction = Math.min(1, Math.max(0, livingReduction));
-            const livingBase = state.livingCostsInflation ? state.annualLivingCosts * cumInfl : state.annualLivingCosts;
-            const living = anyoneDrawingDown ? livingBase * (1 - livingReduction) : 0;
             const excessFunds = anyoneDrawingDown ? totNet - living : null;
 
             results.push({
@@ -1499,19 +1723,21 @@
                 eugeneTargetGross: eugTarget, annabelleTargetGross: annTarget,
                 eugeneHasOverride: eugHasOvr, annabelleHasOverride: annHasOvr,
                 eugeneStatePension: eugState, eugeneAvon: eugAvon, eugeneCivil: eugCivil,
-                eugeneSurvivorPension: eugSurv, eugeneSurvivorLump: eugSurvLumpYr,
+                eugeneSurvivorPension: eugSurv,
                 annabelleSurvivorPension: annSurv,
                 eugeneDrawdown: eugDraw, eugenePot: eugDead ? 0 : Math.max(0, eugenePot + eugInheritedPot),
                 eugeneInheritedPot: Math.max(0, eugInheritedPot),
+                eugeneDrawInherited: eugDrawInh, eugeneInheritedTaxFree: eugInheritedTaxFree,
                 eugeneTFC: eugTFC, eugenePhased: eugPhased,
                 eugeneTFCRemaining: (eugPhased && eugTFCRemaining !== null) ? Math.max(0, eugTFCRemaining) : null,
-                eugeneGross: eugGross, eugeneTax: eugTax, eugeneNet: eugNet, eugeneIncomeLimited: eugLimited,
+                eugeneGross: eugGross, eugeneTax: eugTax, eugeneNet: eugNet, eugeneIncomeLimited: eugLimited, eugeneComfort: eugComfort,
                 annabelleStatePension: annState, annabelleTeachers: annTeach,
                 annabelleDrawdown: annDraw, annabellePot: annDead ? 0 : Math.max(0, annabellePot + annInheritedPot),
                 annabelleInheritedPot: Math.max(0, annInheritedPot),
+                annabelleDrawInherited: annDrawInh, annabelleInheritedTaxFree: annInheritedTaxFree,
                 annabelleTFC: annTFC, annabellePhased: annPhased,
                 annabelleTFCRemaining: (annPhased && annTFCRemaining !== null) ? Math.max(0, annTFCRemaining) : null,
-                annabelleGross: annGross, annabelleTax: annTax, annabelleNet: annNet, annabelleIncomeLimited: annLimited,
+                annabelleGross: annGross, annabelleTax: annTax, annabelleNet: annNet, annabelleIncomeLimited: annLimited, annabelleComfort: annComfort,
                 totalFamilyGross: totGross, totalFamilyNet: totNet, livingCosts: living, excessFunds
             });
         }
@@ -2077,9 +2303,11 @@
             ds('EI State Pension',           data.map(d => d.eugeneStatePension),  '#2c5282'),
             ds('EI Avon Pension',            data.map(d => d.eugeneAvon),          '#4299e1'),
             ds('EI Civil Service Pension',   data.map(d => d.eugeneCivil),         '#90cdf4'),
+            ds('EI Survivor Pension (Mort)', data.map(d => d.eugeneSurvivorPension),'#805ad5'),
             ds('AI Parmenion Drawdown',      data.map(d => d.annabelleDrawdown),   '#276749'),
             ds('AI State Pension',           data.map(d => d.annabelleStatePension),'#38a169'),
             ds('AI Teachers Pension',        data.map(d => d.annabelleTeachers),   '#9ae6b4'),
+            ds('AI Survivor Pension (Mort)', data.map(d => d.annabelleSurvivorPension),'#dd6b20'),
             {
                 label: 'Living Costs',
                 data: data.map(d => d.anyoneDrawingDown ? d.livingCosts : null),
@@ -2221,6 +2449,26 @@
                 if (!collapsed) [cmpTaxChart, cmpExcessChart, cmpPotChart].forEach(ch => ch && ch.resize());
             });
         }
+        // Mortality Sensitivity card: same collapse pattern.
+        const ms = document.getElementById('mortalitySensitivityCard');
+        if (ms) {
+            const h2 = ms.querySelector('h2');
+            const btn = document.createElement('span');
+            btn.className = 'chart-toggle';
+            h2.prepend(btn);
+            const setState = collapsed => {
+                ms.classList.toggle('collapsed', collapsed);
+                btn.textContent = collapsed ? '+' : '−';
+                btn.title = collapsed ? 'Show mortality sensitivity' : 'Hide mortality sensitivity';
+            };
+            setState(stored.includes('mortalitySensitivityCard'));
+            h2.addEventListener('click', () => {
+                const collapsed = !ms.classList.contains('collapsed');
+                setState(collapsed);
+                persist('mortalitySensitivityCard', collapsed);
+                if (!collapsed) [mortEIExcessChart, mortEIPotChart, mortAIExcessChart, mortAIPotChart].forEach(ch => ch && ch.resize());
+            });
+        }
         // Key Outcomes and Year-by-Year Projections sections: same + / − toggle.
         const wireSection = (cont, h2, id, label) => {
             const btn = document.createElement('span');
@@ -2254,7 +2502,7 @@
     function renderTable(data) {
         const thead = document.querySelector('#dataTable thead');
         const tbody = document.querySelector('#dataTable tbody');
-        thead.innerHTML = `<tr class="header-group"><th rowspan="2">Year</th><th rowspan="2">Infl</th><th colspan="11" style="background:#ebf4ff;color:#1a365d;border-right:2px solid #1a365d;">EI</th><th colspan="11" style="background:#f0fff4;color:#1a4731;border-right:2px solid #1a4731;">AI</th><th colspan="3" style="background:#faf5ff;color:#44337a;">Family</th></tr><tr><th>Age</th><th>Target</th><th>State</th><th>DB</th><th>Draw</th><th>TFC</th><th>TFC Left</th><th>Pot</th><th>Gross</th><th>Tax</th><th>Net</th><th>Age</th><th>Target</th><th>State</th><th>DB</th><th>Draw</th><th>TFC</th><th>TFC Left</th><th>Pot</th><th>Gross</th><th>Tax</th><th>Net</th><th>Gross</th><th>Net</th><th>Excess</th></tr>`;
+        thead.innerHTML = `<tr class="header-group"><th rowspan="2">Year</th><th rowspan="2">Infl</th><th colspan="12" style="background:#ebf4ff;color:#1a365d;border-right:2px solid #1a365d;">EI</th><th colspan="12" style="background:#f0fff4;color:#1a4731;border-right:2px solid #1a4731;">AI</th><th colspan="3" style="background:#faf5ff;color:#44337a;">Family</th></tr><tr><th>Age</th><th>Target</th><th>State</th><th>DB</th><th>Draw</th><th>TFC</th><th>TFC Left</th><th>Pot</th><th>Gross</th><th>Tax</th><th>Net</th><th title="Money received from AI if she dies: £2,000/yr survivor pension, plus her remaining Parmenion pot and the one-off £13,000 payment moved into EI's pot">Mort</th><th>Age</th><th>Target</th><th>State</th><th>DB</th><th>Draw</th><th>TFC</th><th>TFC Left</th><th>Pot</th><th>Gross</th><th>Tax</th><th>Net</th><th title="Money received from EI if he dies: 50% of his Avon pension and 3/8 of his Civil Service pension each year, plus his remaining Parmenion pot transferred into AI's pot">Mort</th><th>Gross</th><th>Net</th><th>Excess</th></tr>`;
         const fmt = n => '£' + Math.round(n).toLocaleString('en-GB');
         const fmtTFCLeft = (rem, phased, phase) => {
             if (!phased || phase !== 'drawdown' || rem === null || rem === undefined) return '<td class="pre-drawdown">-</td>';
@@ -2297,7 +2545,39 @@
                 ? `<td class="${r.excessFunds<0?'negative':'positive'}">${fmt(r.excessFunds)}</td>`
                 : `<td class="pre-drawdown">-</td>`;
             
-            return `<tr class="${cls}"><td>${r.year}</td><td>${(r.inflationRate*100).toFixed(1)}%</td>${eugAgeCell}${tCell('eugene',r.eugenePhase,r.eugeneTargetGross,r.eugeneIncomeLimited,r.eugeneHasOverride,r.eugeneDeceased)}<td>${r.eugeneStatePension>0?fmt(r.eugeneStatePension):'-'}</td><td>${(r.eugeneAvon+r.eugeneCivil+r.eugeneSurvivorPension)>0?fmt(r.eugeneAvon+r.eugeneCivil+r.eugeneSurvivorPension):'-'}</td><td>${r.eugeneDrawdown>0?fmt(r.eugeneDrawdown):(r.eugenePhase==='drawdown'?'£0':'-')}</td><td>${r.eugeneTFC>0?fmt(r.eugeneTFC):(r.eugenePhase==='drawdown'&&r.eugenePhased?'£0':'-')}</td>${fmtTFCLeft(r.eugeneTFCRemaining,r.eugenePhased,r.eugenePhase)}<td class="${eEx?'negative':''}">${fmt(r.eugenePot)}</td><td>${fmt(r.eugeneGross)}</td><td>${fmt(r.eugeneTax)}</td><td>${fmt(r.eugeneNet)}${r.eugeneSurvivorLump>0?`<div style="font-size:0.7rem;color:#805ad5;" title="One-off tax-free survivor payment after AI's death">incl. ${fmt(r.eugeneSurvivorLump)} survivor payment</div>`:''}</td>${annAgeCell}${tCell('annabelle',r.annabellePhase,r.annabelleTargetGross,r.annabelleIncomeLimited,r.annabelleHasOverride,r.annabelleDeceased)}<td>${r.annabelleStatePension>0?fmt(r.annabelleStatePension):'-'}</td><td>${(r.annabelleTeachers+r.annabelleSurvivorPension)>0?fmt(r.annabelleTeachers+r.annabelleSurvivorPension):'-'}</td><td>${r.annabelleDrawdown>0?fmt(r.annabelleDrawdown):(r.annabellePhase==='drawdown'?'£0':'-')}</td><td>${r.annabelleTFC>0?fmt(r.annabelleTFC):(r.annabellePhase==='drawdown'&&r.annabellePhased?'£0':'-')}</td>${fmtTFCLeft(r.annabelleTFCRemaining,r.annabellePhased,r.annabellePhase)}<td class="${aEx?'negative':''}">${fmt(r.annabellePot)}</td><td>${fmt(r.annabelleGross)}</td><td>${fmt(r.annabelleTax)}</td><td>${fmt(r.annabelleNet)}</td><td>${fmt(r.totalFamilyGross)}</td><td>${fmt(r.totalFamilyNet)}</td>${excessDisplay}</tr>`;
+            // Mort column: money received THIS YEAR from the deceased partner.
+            // The annual survivor pension every year from the death year, plus
+            // (in the death year itself) the deceased's remaining Parmenion pot
+            // transferred into the survivor's own pot and any one-off payment.
+            // The survivor uses this money, like their own DB pensions, towards
+            // the reduced living costs as a minimum.
+            const mortMoney = (who) => {
+                const dead = who === 'eugene' ? r.eugeneDeceased : r.annabelleDeceased;
+                const partnerDead = who === 'eugene' ? r.annabelleDeceased : r.eugeneDeceased;
+                if (dead) return '<td style="color:#a0aec0;">†</td>';
+                if (!partnerDead) return '<td class="pre-drawdown">-</td>';
+                const partnerDeathYr = who === 'eugene' ? annDeathYr : eugDeathYr;
+                const partner = who === 'eugene' ? 'AI' : 'EI';
+                const annual = who === 'eugene' ? r.eugeneSurvivorPension : r.annabelleSurvivorPension;
+                const annualDesc = who === 'eugene'
+                    ? 'survivor pension (£2,000/yr grown at the Teachers rate)'
+                    : "50% of EI's Avon pension plus 3/8 (37.5%) of his Civil Service pension";
+                const inhPot = who === 'eugene' ? r.eugeneInheritedPot : r.annabelleInheritedPot;
+                const inhDraw = who === 'eugene' ? (r.eugeneDrawInherited || 0) : (r.annabelleDrawInherited || 0);
+                const inhTaxFree = who === 'eugene' ? r.eugeneInheritedTaxFree : r.annabelleInheritedTaxFree;
+                if (partnerDeathYr) {
+                    const potIn = inhPot + inhDraw;
+                    const taxNote = inhTaxFree ? `tax-free — ${partner} died before 75` : `taxable as ${who === 'eugene' ? 'EI' : 'AI'} income — ${partner} died at 75+`;
+                    const potDesc = who === 'eugene'
+                        ? `${partner}'s remaining Parmenion pot plus the one-off £13,000 payment move into EI's own pot — withdrawals ${taxNote}`
+                        : `${partner}'s remaining Parmenion pot transferred into AI's own pot — withdrawals ${taxNote}`;
+                    const sub = potIn > 0 ? `<div style="font-size:0.7rem;color:#805ad5;" title="${potDesc}">+ ${fmt(potIn)} pot in</div>` : '';
+                    return `<td style="background:#faf5ff;font-weight:bold;" title="${partner} dies this year — ${annualDesc}: ${fmt(annual)}${potIn > 0 ? `; ${potDesc}: ${fmt(potIn)}` : ''}">${fmt(annual)}${sub}</td>`;
+                }
+                return `<td title="${annualDesc} — received each year from ${partner}'s death year">${fmt(annual)}</td>`;
+            };
+            
+            return `<tr class="${cls}"><td>${r.year}</td><td>${(r.inflationRate*100).toFixed(1)}%</td>${eugAgeCell}${tCell('eugene',r.eugenePhase,r.eugeneTargetGross,r.eugeneIncomeLimited,r.eugeneHasOverride,r.eugeneDeceased)}<td>${r.eugeneStatePension>0?fmt(r.eugeneStatePension):'-'}</td><td>${(r.eugeneAvon+r.eugeneCivil)>0?fmt(r.eugeneAvon+r.eugeneCivil):'-'}</td><td>${r.eugeneDrawdown>0?fmt(r.eugeneDrawdown):(r.eugenePhase==='drawdown'?'£0':'-')}</td><td>${r.eugeneTFC>0?fmt(r.eugeneTFC):(r.eugenePhase==='drawdown'&&r.eugenePhased?'£0':'-')}</td>${fmtTFCLeft(r.eugeneTFCRemaining,r.eugenePhased,r.eugenePhase)}<td class="${eEx?'negative':''}">${fmt(r.eugenePot)}</td><td>${fmt(r.eugeneGross)}</td><td>${fmt(r.eugeneTax)}</td><td>${fmt(r.eugeneNet)}</td>${mortMoney('eugene')}${annAgeCell}${tCell('annabelle',r.annabellePhase,r.annabelleTargetGross,r.annabelleIncomeLimited,r.annabelleHasOverride,r.annabelleDeceased)}<td>${r.annabelleStatePension>0?fmt(r.annabelleStatePension):'-'}</td><td>${r.annabelleTeachers>0?fmt(r.annabelleTeachers):'-'}</td><td>${r.annabelleDrawdown>0?fmt(r.annabelleDrawdown):(r.annabellePhase==='drawdown'?'£0':'-')}</td><td>${r.annabelleTFC>0?fmt(r.annabelleTFC):(r.annabellePhase==='drawdown'&&r.annabellePhased?'£0':'-')}</td>${fmtTFCLeft(r.annabelleTFCRemaining,r.annabellePhased,r.annabellePhase)}<td class="${aEx?'negative':''}">${fmt(r.annabellePot)}</td><td>${fmt(r.annabelleGross)}</td><td>${fmt(r.annabelleTax)}</td><td>${fmt(r.annabelleNet)}</td>${mortMoney('annabelle')}<td>${fmt(r.totalFamilyGross)}</td><td>${fmt(r.totalFamilyNet)}</td>${excessDisplay}</tr>`;
         }).join('');
         
         tbody.querySelectorAll('.editable-cell').forEach(c => c.addEventListener('click', handleCellClick));
@@ -2536,9 +2816,9 @@
             alerts += `<div class="alert-box" style="border-color:#805ad5;background:#faf5ff;"><h3 style="color:#553c9a;">† ${person} dies in ${year} (age ${age})</h3><p>${what}; ${taxNote}. Their own pensions and drawdown stop from ${year}.</p></div>`;
         };
         if (state.eugeneDeathEnabled) deathNote('EI', state.eugeneDeathYear, state.eugeneBirthday,
-            `AI receives 50% of EI's Avon &amp; Civil Service pensions (taxable); family living costs reduce by ${state.eugeneDeathLivingReduction}%`);
+            `AI receives 50% of EI's Avon pension and 3/8 of his Civil Service pension (taxable); family living costs reduce by ${state.eugeneDeathLivingReduction}%`);
         if (state.annabelleDeathEnabled) deathNote('AI', state.annabelleDeathYear, state.annabelleBirthday,
-            `EI receives a £2,000/yr survivor pension plus a one-off £80,000 tax-free payment; family living costs reduce by ${state.annabelleDeathLivingReduction}%`);
+            `EI receives a £2,000/yr survivor pension plus a one-off £13,000 payment into his Parmenion pot; family living costs reduce by ${state.annabelleDeathLivingReduction}%`);
 
         alertsSection.innerHTML = alerts ? `<h2 class="section-title" style="color:#c53030;">⚠️ Alerts &amp; Notices</h2>` + alerts : '';
         alertsSection.style.display = alerts ? 'block' : 'none';
@@ -2904,7 +3184,7 @@
                     ${row('Contrib', fmt(state.eugeneMonthlyContrib) + '/mo to ' + state.eugeneContribStopYear)}
                     ${row('Balance Valid', state.eugeneBalanceValidFrom)}
                     ${row('Pot Total', fmt(state.eugenePot1Balance + state.eugenePot2Balance))}
-                    ${row('Mortality', state.eugeneDeathEnabled ? 'Dies ' + state.eugeneDeathYear + ' (living −' + state.eugeneDeathLivingReduction + '%)' : 'Not modelled')}
+                    ${row('Mortality', state.eugeneDeathEnabled ? 'Dies ' + state.eugeneDeathYear + ' (age ' + getAgeInYear(state.eugeneBirthday, state.eugeneDeathYear) + ', living −' + state.eugeneDeathLivingReduction + '%)' : 'Not modelled')}
                 </div>
                 <div style="border:1px solid #ccc;padding:3px;">
                     <div style="font-size:7.5pt;font-weight:bold;color:#1a365d;border-bottom:1px solid #ccc;margin-bottom:2px;padding-bottom:1px;">AI Parameters</div>
@@ -2914,7 +3194,7 @@
                     ${row('Contrib', fmt(state.annabelleMonthlyContrib) + '/mo to ' + state.annabelleContribStopYear)}
                     ${row('Balance Valid', state.annabelleBalanceValidFrom)}
                     ${row('Starting Balance', fmt(state.annabelleStartingBalance))}
-                    ${row('Mortality', state.annabelleDeathEnabled ? 'Dies ' + state.annabelleDeathYear + ' (living −' + state.annabelleDeathLivingReduction + '%)' : 'Not modelled')}
+                    ${row('Mortality', state.annabelleDeathEnabled ? 'Dies ' + state.annabelleDeathYear + ' (age ' + getAgeInYear(state.annabelleBirthday, state.annabelleDeathYear) + ', living −' + state.annabelleDeathLivingReduction + '%)' : 'Not modelled')}
                 </div>
                 <div style="border:1px solid #ccc;padding:3px;">
                     <div style="font-size:7.5pt;font-weight:bold;color:#1a365d;border-bottom:1px solid #ccc;margin-bottom:2px;padding-bottom:1px;">EI DB Pensions</div>
@@ -3007,7 +3287,9 @@
             { id: 'eugeneDeathLivingReduction', key: 'eugeneDeathLivingReduction' },
             { id: 'annabelleDeathEnabled', key: 'annabelleDeathEnabled', isCheckbox: true },
             { id: 'annabelleDeathYear', key: 'annabelleDeathYear' },
-            { id: 'annabelleDeathLivingReduction', key: 'annabelleDeathLivingReduction' }
+            { id: 'annabelleDeathLivingReduction', key: 'annabelleDeathLivingReduction' },
+            { id: 'eugeneSurvivorMargin', key: 'eugeneSurvivorMargin' },
+            { id: 'annabelleSurvivorMargin', key: 'annabelleSurvivorMargin' }
         ];
         
         bindings.forEach(({ id, key, transform, isCheckbox, isMonth, isDate }) => {
@@ -3024,6 +3306,30 @@
                 }
                 update();
             });
+        });
+
+        // Death age ↔ year sync. Age is derived from the birthday (never stored
+        // in state): changing the year fills in the age; entering an age sets
+        // the year (birth year + age, clamped to the projection range).
+        ['eugene', 'annabelle'].forEach(person => {
+            const yearEl = document.getElementById(person + 'DeathYear');
+            const ageEl = document.getElementById(person + 'DeathAge');
+            const bEl = document.getElementById(person + 'Birthday');
+            if (!yearEl || !ageEl) return;
+            const syncAgeFromYear = () => {
+                const y = parseInt(yearEl.value);
+                if (!isNaN(y)) ageEl.value = getAgeInYear(state[person + 'Birthday'], y);
+            };
+            yearEl.addEventListener('input', syncAgeFromYear);
+            if (bEl) bEl.addEventListener('input', syncAgeFromYear);
+            ageEl.addEventListener('input', () => {
+                const a = parseInt(ageEl.value);
+                if (isNaN(a) || !state[person + 'Birthday']) return;
+                const birthYear = new Date(state[person + 'Birthday']).getFullYear();
+                yearEl.value = Math.min(2063, Math.max(2025, birthYear + a));
+                yearEl.dispatchEvent(new Event('input'));
+            });
+            syncAgeFromYear();
         });
     }
 
@@ -3628,6 +3934,228 @@
             </div>`);
     }
 
+    // ============================================================================
+    // MORTALITY SENSITIVITY
+    // ============================================================================
+    // Answers one question: what is the financial impact on the survivor if one
+    // of them dies in a given year? Two independent scenarios — "If EI dies"
+    // (impact on AI) and "If AI dies" (impact on EI). Each sweeps the death year
+    // 2028–2063 (from the year EI takes his pension), rerunning the full engine with the survivor transfers, the
+    // living-cost reduction and the survivor minimum drawdown applied. For every
+    // For every death year we record the survivor's tightest year (worst annual
+    // excess or shortfall vs living costs). Each scenario renders three headline
+    // stat tiles (costs covered? worst-case spare cash, pot at 90) plus one bar
+    // per death year: green = covered with surplus, red = genuine shortfall.
+    // demand; a fingerprint of the non-death inputs marks it stale on change.
+    let mortEIExcessChart = null, mortAIExcessChart = null;
+    let mortSensFingerprint = null, mortSensRan = false;
+
+    function mortSensStateFingerprint() {
+        const s = { ...state, eugeneDeathEnabled: 0, eugeneDeathYear: 0, annabelleDeathEnabled: 0, annabelleDeathYear: 0 };
+        return JSON.stringify(s);
+    }
+
+    function markMortSensDirty() {
+        if (!mortSensRan) return;
+        const el = document.getElementById('mortSensStale');
+        if (el) el.style.display = mortSensFingerprint !== mortSensStateFingerprint() ? 'block' : 'none';
+    }
+
+    function computeMortalitySensitivity() {
+        const saved = {
+            eugeneDeathEnabled: state.eugeneDeathEnabled, eugeneDeathYear: state.eugeneDeathYear,
+            annabelleDeathEnabled: state.annabelleDeathEnabled, annabelleDeathYear: state.annabelleDeathYear
+        };
+        const years = [];
+        for (let y = 2028; y <= 2063; y++) years.push(y);
+
+        const sweepOne = (who) => years.map(y => {
+            state.eugeneDeathEnabled = who === 'eugene';
+            state.annabelleDeathEnabled = who === 'annabelle';
+            state.eugeneDeathYear = y;
+            state.annabelleDeathYear = y;
+            const { results } = calculate();
+            const survRows = results.filter(r => who === 'eugene'
+                ? (r.eugeneDeceased && !r.annabelleDeceased)
+                : (r.annabelleDeceased && !r.eugeneDeceased));
+            let worstRow = null, excSum = 0, excCount = 0, netSum = 0, livSum = 0;
+            survRows.forEach(r => {
+                if (r.excessFunds === null) return;
+                excSum += r.excessFunds; excCount++;
+                netSum += r.totalFamilyNet; livSum += r.livingCosts;
+                if (!worstRow || r.excessFunds < worstRow.excessFunds) worstRow = r;
+            });
+            const potKey = who === 'eugene' ? 'annabellePot' : 'eugenePot';
+            const ageKey = who === 'eugene' ? 'annabelleAge' : 'eugeneAge';
+            const phaseKey = who === 'eugene' ? 'annabellePhase' : 'eugenePhase';
+            const comfortKey = who === 'eugene' ? 'annabelleComfort' : 'eugeneComfort';
+            const row90 = survRows.find(r => r[ageKey] === 90);
+            const depRow = survRows.find(r => r[phaseKey] === 'drawdown' && r[potKey] <= 0.5);
+            return {
+                year: y,
+                age: getAgeInYear(who === 'eugene' ? state.eugeneBirthday : state.annabelleBirthday, y),
+                survAge: getAgeInYear(who === 'eugene' ? state.annabelleBirthday : state.eugeneBirthday, y),
+                worst: worstRow ? worstRow.excessFunds : null,
+                avg: excCount ? excSum / excCount : null,
+                avgNet: excCount ? netSum / excCount : null,
+                avgLiving: excCount ? livSum / excCount : null,
+                worstYear: worstRow ? worstRow.year : null,
+                worstSurvAge: worstRow ? worstRow[ageKey] : null,
+                shortYears: survRows.filter(r => r.excessFunds !== null && r.excessFunds < -1).length,
+                fallbackYears: survRows.filter(r => r[comfortKey] === 'costs' || r[comfortKey] === 'short').length,
+                pot90: row90 ? row90[potKey] : null,
+                depYear: depRow ? depRow.year : null,
+                depAge: depRow ? depRow[ageKey] : null
+            };
+        });
+
+        const eiDies = sweepOne('eugene');    // impact on AI
+        const aiDies = sweepOne('annabelle'); // impact on EI
+        Object.assign(state, saved);
+        return { years, eiDies, aiDies };
+    }
+
+    function renderMortalitySensitivity() {
+        const elEI = document.getElementById('mortSensSummaryEI');
+        const elAI = document.getElementById('mortSensSummaryAI');
+        if (!elEI || !elAI || typeof Chart === 'undefined') return;
+        const res = computeMortalitySensitivity();
+        mortSensFingerprint = mortSensStateFingerprint();
+        mortSensRan = true;
+        document.getElementById('mortSensStale').style.display = 'none';
+
+        const fmtM = n => (n < 0 ? '-£' : '£') + Math.abs(Math.round(n)).toLocaleString('en-GB');
+        const worstOf = arr => arr.filter(d => d.worst !== null).reduce((a, b) => (a === null || b.worst < a.worst ? b : a), null);
+        const verdict = (d, whoDies, surv) => {
+            if (!d) return `${surv} has no drawdown years after ${whoDies}'s death, whichever year it falls in.`;
+            const tight = d.worst < 0
+                ? `in ${surv}'s tightest year (<strong>${d.worstYear}</strong>, ${surv} age ${d.worstSurvAge}) income falls <strong style="color:#c53030;">${fmtM(d.worst)}/yr</strong> short of the reduced living costs — ${d.shortYears} shortfall year${d.shortYears === 1 ? '' : 's'} in total`
+                : `even in ${surv}'s tightest year (<strong>${d.worstYear}</strong>, ${surv} age ${d.worstSurvAge}) income still covers the reduced living costs with <strong style="color:#276749;">${fmtM(d.worst)}/yr</strong> to spare — living costs are covered whenever the death falls`;
+            const pot = d.depYear
+                ? `${surv}'s Parmenion pot <strong style="color:#c53030;">runs out in ${d.depYear} (age ${d.depAge})</strong>`
+                : `${surv}'s Parmenion pot <strong>never runs out</strong>${d.pot90 !== null ? ` (${fmtM(d.pot90)} left at age 90)` : ''}`;
+            return `Hardest for ${surv} if ${whoDies} dies in <strong>${d.year}</strong> (${whoDies} age ${d.age}, ${surv} age ${d.survAge}): ${tight}. In that scenario ${pot}.`;
+        };
+        elEI.innerHTML = verdict(worstOf(res.eiDies), 'EI', 'AI');
+        elAI.innerHTML = verdict(worstOf(res.aiDies), 'AI', 'EI');
+
+        // Headline stat tiles: the whole answer in three numbers per scenario.
+        const statTiles = (elId, arr, surv) => {
+            const el = document.getElementById(elId);
+            if (!el) return;
+            const valid = arr.filter(d => d.worst !== null);
+            const worst = worstOf(arr);
+            const coveredYears = valid.filter(d => d.worst >= -1).length;
+            const allCovered = valid.length > 0 && coveredYears === valid.length;
+            const shortfalls = valid.length - coveredYears;
+            const fallbackScen = valid.filter(d => d.fallbackYears > 0).length;
+            const covCls = allCovered ? (fallbackScen ? 'ms-warn' : 'ms-good') : (shortfalls ? 'ms-bad' : 'ms-good');
+            const covVal = valid.length === 0 ? 'n/a'
+                : !allCovered ? `${coveredYears} of ${valid.length} years`
+                : fallbackScen ? 'Yes — costs only' : 'Yes — every year';
+            const covSub = !allCovered
+                ? `${shortfalls} death-year${shortfalls === 1 ? '' : 's'} leave a shortfall`
+                : fallbackScen
+                    ? `bills covered whenever death falls, but in ${fallbackScen} scenario${fallbackScen === 1 ? '' : 's'} the full comfort margin isn't reached (amber bars)`
+                    : 'bills and full comfort margin covered whatever year death falls';
+            let worstVal = '—', worstSub = 'no survivor drawdown years', worstCls = 'ms-good';
+            if (worst) {
+                const short = worst.worst < -1;
+                worstCls = short ? 'ms-bad' : 'ms-good';
+                worstVal = (short ? '-' : '+') + fmtM(Math.abs(worst.worst)) + '/yr';
+                worstSub = `if death falls in ${worst.year} — tightest year ${worst.worstYear} (${surv} age ${worst.worstSurvAge})`;
+            }
+            const potVal = worst ? (worst.depYear ? `Runs out ${worst.depYear}` : fmtM(worst.pot90 ?? 0)) : '—';
+            const potSub = worst ? (worst.depYear ? `${surv}'s pot empties at age ${worst.depAge}` : `left in ${surv}'s pot at age 90 (worst case)`) : '';
+            const potCls = worst && worst.depYear ? 'ms-bad' : 'ms-good';
+            el.innerHTML =
+                `<div class="mort-stat"><div class="ms-label">Living costs always covered?</div><div class="ms-value ${covCls}">${covVal}</div><div class="ms-sub">${covSub}</div></div>` +
+                `<div class="mort-stat"><div class="ms-label">Worst-case spare cash</div><div class="ms-value ${worstCls}">${worstVal}</div><div class="ms-sub">${worstSub}</div></div>` +
+                `<div class="mort-stat"><div class="ms-label">Parmenion pot at age 90</div><div class="ms-value ${potCls}">${potVal}</div><div class="ms-sub">${potSub}</div></div>`;
+        };
+        statTiles('mortEIStats', res.eiDies, 'AI');
+        statTiles('mortAIStats', res.aiDies, 'EI');
+
+        // X axis: year plus both ages, as in the income-by-source chart
+        const labels = res.years.map(y => [String(y), `EI ${getAgeInYear(state.eugeneBirthday, y)} · AI ${getAgeInYear(state.annabelleBirthday, y)}`]);
+        const ttTitle = items => {
+            const y = res.years[items[0].dataIndex];
+            return `${y} — EI age ${getAgeInYear(state.eugeneBirthday, y)} · AI age ${getAgeInYear(state.annabelleBirthday, y)}`;
+        };
+        const fmtAxis = v => {
+            const a = Math.abs(v), s = v < 0 ? '-£' : '£';
+            if (a >= 1000000) return s + (a / 1000000).toFixed(1) + 'm';
+            if (a >= 10000) return s + (a / 1000).toFixed(0) + 'k';
+            if (a >= 1000) return s + (a / 1000).toFixed(1) + 'k';
+            return s + Math.round(a);
+        };
+        const baseOpts = (title, suffix, zeroLine) => ({
+            responsive: true, maintainAspectRatio: false, animation: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                title: { display: true, text: title, font: { size: 12 } },
+                legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } },
+                tooltip: { callbacks: { title: ttTitle, label: c => `${c.dataset.label}: ${fmtM(c.parsed.y)}${suffix}` } }
+            },
+            scales: {
+                x: { ticks: { maxRotation: 0, autoSkip: true, font: { size: 9 } }, grid: { display: false } },
+                y: {
+                    ticks: { callback: fmtAxis },
+                    grid: zeroLine ? { color: ctx => (ctx.tick && ctx.tick.value === 0) ? '#4a5568' : '#e2e8f0' } : {}
+                }
+            }
+        });
+        const barUpd = (chart, id, arr, surv) => {
+            // One bar per year of death = the survivor's net income in a
+            // typical year; the dashed line = the reduced living costs. A bar
+            // rising ABOVE the line is a surplus; one falling BELOW it is a
+            // deficit. Colour flags coverage: green = bills covered every year
+            // in that scenario, red = at least one shortfall year.
+            const data = arr.map(d => d.avgNet);
+            const costLine = arr.map(d => d.avgLiving);
+            // Three tiers: red = at least one shortfall year; amber = bills met
+            // every year but the comfort margin had to be dropped in some;
+            // green = costs + full comfort margin funded throughout.
+            const colors = arr.map(d =>
+                (d.worst !== null && d.worst < -1) ? '#e53e3e'
+                : (d.fallbackYears > 0 ? '#ed8936' : '#48bb78'));
+            const opts = baseOpts(
+                [`If death falls in year X — ${surv}'s typical-year net income (bars) vs reduced living costs (line)`,
+                 'bar above the line = surplus · below = deficit · green = costs + full comfort margin funded · amber = margin not fully reached (pot pressure or 20%-band cap) · red = shortfall'],
+                '/yr', false);
+            const vals = data.concat(costLine).filter(v => v !== null && isFinite(v));
+            const hi = Math.max(...vals, 0);
+            opts.scales.y.min = 0;
+            opts.scales.y.max = Math.ceil(hi / 5000) * 5000 || 5000;
+            opts.plugins.tooltip.callbacks.label = c => {
+                const d = arr[c.dataIndex];
+                if (c.datasetIndex === 1) return `Reduced living costs: ${fmtM(d.avgLiving ?? 0)}/yr`;
+                const lines = [`Typical-year net income: ${fmtM(d.avgNet ?? 0)}/yr`];
+                if (d.avg !== null) lines.push(`Spare cash (typical): ${d.avg >= 0 ? '+' : ''}${fmtM(d.avg)}/yr`);
+                lines.push(`Tightest year (${d.worstYear}, age ${d.worstSurvAge}): ${fmtM(d.worst)}/yr`);
+                if (d.shortYears > 0) lines.push(`Shortfall years in this scenario: ${d.shortYears}`);
+                if (d.fallbackYears > 0) lines.push(`Years without the full comfort margin: ${d.fallbackYears}`);
+                return lines;
+            };
+            const datasets = [
+                { label: `${surv}'s net income (typical year)`, data, backgroundColor: colors, borderColor: colors, borderWidth: 1, order: 2 },
+                { label: 'Reduced living costs', data: costLine, type: 'line', borderColor: '#2d3748', borderWidth: 2, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 }
+            ];
+            if (chart) {
+                chart.options = opts;
+                chart.data.labels = labels;
+                chart.data.datasets = datasets;
+                chart.update('none');
+                return chart;
+            }
+            return new Chart(document.getElementById(id).getContext('2d'), {
+                type: 'bar', data: { labels, datasets }, options: opts
+            });
+        };
+        mortEIExcessChart = barUpd(mortEIExcessChart, 'mortEIExcessChart', res.eiDies, 'AI');
+        mortAIExcessChart = barUpd(mortAIExcessChart, 'mortAIExcessChart', res.aiDies, 'EI');
+    }
+
     function update() {
         const { results: data, lumpSumInfo } = calculate();
         renderSummary(data, lumpSumInfo);
@@ -3637,6 +4165,7 @@
         updatePrintSummary(data, lumpSumInfo);
         appendComparisonPrint();
         renderComparison(data);
+        markMortSensDirty();
     }
 
     // ============================================================================
@@ -3702,6 +4231,11 @@
                 // TFC auto-calculate default for scenarios saved before it existed
                 if (sc.state.eugeneTFCAuto === undefined) state.eugeneTFCAuto = true;
                 if (sc.state.annabelleTFCAuto === undefined) state.annabelleTFCAuto = true;
+                // Single shared survivor margin split into per-person margins
+                if (sc.state.survivorComfortMargin !== undefined) {
+                    if (sc.state.eugeneSurvivorMargin === undefined) state.eugeneSurvivorMargin = sc.state.survivorComfortMargin;
+                    if (sc.state.annabelleSurvivorMargin === undefined) state.annabelleSurvivorMargin = sc.state.survivorComfortMargin;
+                }
                 
                 // Update scenario name and print title
                 state.scenarioName = sc.name;
@@ -3769,6 +4303,13 @@
         // Manual TFC entitlement inputs only apply when Auto is off
         document.getElementById('eugeneTFCEntitlement').disabled = !!state.eugeneTFCAuto;
         document.getElementById('annabelleTFCEntitlement').disabled = !!state.annabelleTFCAuto;
+        // Derived death-age fields (not stored in state — computed from birthday + year)
+        ['eugene', 'annabelle'].forEach(person => {
+            const ageEl = document.getElementById(person + 'DeathAge');
+            if (ageEl && typeof state[person + 'DeathYear'] === 'number') {
+                ageEl.value = getAgeInYear(state[person + 'Birthday'], state[person + 'DeathYear']);
+            }
+        });
     }
 
     function resetToDefaults() {
@@ -3981,6 +4522,15 @@
         // Initial render
         update();
         initChartToggles();
+
+        // Mortality sensitivity: run once after the page has painted (the sweep
+        // is ~1,500 engine runs and would block first paint); re-run on demand.
+        document.getElementById('mortSensRerun').addEventListener('click', () => {
+            document.getElementById('mortSensSummaryEI').textContent = 'Running analysis…';
+            document.getElementById('mortSensSummaryAI').textContent = 'Running analysis…';
+            setTimeout(() => renderMortalitySensitivity(), 30);
+        });
+        setTimeout(() => renderMortalitySensitivity(), 150);
         
         window.addEventListener('resize', () => {
             const { results } = calculate();

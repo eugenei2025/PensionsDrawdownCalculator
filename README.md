@@ -27,6 +27,22 @@ static app — HTML, CSS and JavaScript with Chart.js. No build step.
 - Optimisers: depletion-age targeting and 20%-band tax optimisation, with
   automatic re-calculation when strategy or lump-sum settings change
 - Manual per-year income overrides by clicking Target cells
+- **Mortality planning**: optional death per person, entered as **year or age
+  (the two auto-sync from the date of birth)**, with survivor
+  transfers (the deceased's remaining Parmenion pot transfers in full into the
+  survivor's own pot — withdrawals tax-free on death before 75, taxable at
+  75+; AI receives 50% of EI's Avon pension and 3/8 (37.5%) of his Civil
+  Service pension each year; EI receives a £2,000/yr survivor pension plus a
+  one-off £80,000 payment that moves straight into his Parmenion pot). Family
+  living costs reduce by a configurable percentage from the
+  death year, and the survivor uses the transferred money like their own
+  pensions: their drawdown rises if needed so net income meets the reduced
+  living costs as a minimum. A per-person **Mort** column in the year-by-year
+  table shows the money received from the deceased partner each year — the
+  annual survivor pension, and in the death year the pot transfer (for EI
+  including the £80,000 payment) — hover for the breakdown
+- `audit-mortality.js`: Node audit harness that extracts the engine and
+  verifies the mortality transfer/payment rules (`node audit-mortality.js`)
 - **Scenario snapshots & comparison**: snapshot any result set (stored in the
   browser), pick a baseline, and compare other snapshots and/or the live
   scenario against it in a **year-by-year table** (Year / EI age / AI age ×
@@ -38,15 +54,17 @@ static app — HTML, CSS and JavaScript with Chart.js. No build step.
 - **Collapsible sections**: charts, Key Outcomes, the Year-by-Year table and
   Scenario Comparison all toggle open/closed from their titles (state
   persists in the browser).
-- **Mortality planning**: optionally model either person dying in a chosen
-  year. Their pensions and drawdown stop; the survivor receives the
-  survivor's benefits (AI: 50% of EI's Avon & Civil Service pensions; EI:
-  £2,000/yr plus a one-off £80,000 tax-free payment), family living costs
-  reduce by a configurable percentage (single vs couple), and the survivor
-  inherits the Parmenion pot — withdrawals from the inherited pot are
-  tax-free if death was before age 75, otherwise taxed as the survivor's
-  income (per pension death-benefit rules). Death years are marked † in the
-  projection table.
+- **Mortality Sensitivity card**: answers "what is the financial impact on the
+  survivor if one of them dies, and how much does the year of death matter?"
+  Two independent scenario blocks — *If EI dies (impact on AI)* and *If AI dies
+  (impact on EI)* — each sweeping the death year 2025–2063 and rerunning the
+  full projection (survivor transfers, living-cost reduction and the survivor
+  minimum drawdown all applied). Per scenario: a plain-English verdict naming
+  the hardest death year, a chart of the survivor's net income minus reduced
+  living costs (typical year and tightest year — below £0 means the pots
+  cannot cover living costs), and a chart of the survivor's Parmenion pot at
+  age 90. All chart axes show the year together with both ages. Auto-detects
+  parameter changes and offers a re-run.
 - Scenario save/load (JSON), reset to defaults, print/PDF summary
 
 ## Running
